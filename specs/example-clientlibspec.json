@@ -1,0 +1,103 @@
+{
+	"metadata": {
+		"name": "Weather Service",
+		"description": "Get weather data"
+	},
+	"domain": [{
+		"name": "Weather",
+        "description": "Something description goes here",
+        "comment" : "Note, this class is obviously wrong.",
+		"fields": [{
+			"name": "temp",
+			"type": "float",
+			"in": "Temp",
+            "description": "I don't know why this is a float.",
+            "comment": "Never pass in 42 or it explodes."
+		}]
+	},
+	{
+		"name": "Report",
+		"fields": [{
+			"name": "current",
+			"type": "Weather",
+			"in": "data->currentObservation"
+		},
+		{
+			"name": "forecasts",
+			"type": "list(Forecast)",
+			"in": "data"
+		},
+		{
+			"name": "name",
+			"type": "string",
+			"in": "location->areaDescription",
+            "description": "Heh, only one has a description."
+		},
+		{
+			"name": "location",
+			"type": "Location",
+			"in": "location",
+            "comment": "This is a comment."
+		},
+		{
+			"name": "elevation",
+			"type": "float",
+			"in": "location->elevation"
+		}]
+	}],
+	"services": [{
+		"name": "Get Weather",
+		"url": "http://forecast.weather.gov/MapClick.php",
+		"type": "post",
+		"description": "Retrieves all the top posts",
+        "comment": "This is a comment-test.",
+		"output": "Report",
+		"inputs": [{
+			"name": "FcstType",
+			"type": "string",
+			"param": false,
+			"indexable": false,
+			"default": "json",
+			"hidden": true,
+            "comment": "You can't actually change this."
+		},
+		{
+			"name": "lat",
+            "clean": "latitude",
+			"param": false,
+			"type": "float",
+			"indexable": true,
+            "description": "This parameter is key! Probably. I don't know."
+		},
+		{
+			"name": "lon",
+            "clean": "longitude",
+			"param": false,
+			"type": "float",
+			"indexable": true,
+            "description": "Banana salads"
+		}]
+	},{
+        "name": "Get location",
+		"url": "http://forecast.weather.gov/<location>/",
+		"type": "get",
+		"description": "Does some stuff",
+		"output": "list(float)",
+		"inputs": [{
+			"name": "location",
+			"type": "string",
+			"param": true,
+			"indexable": true,
+			"hidden": false
+		},
+		{
+			"name": "sort",
+            "clean": "sort_mode",
+			"param": false,
+			"type": "float",
+            "default": "top",
+			"indexable": false,
+            "description": "This description is only included for visibility"
+		}]
+    }]
+}

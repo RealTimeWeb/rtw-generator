@@ -1,0 +1,69 @@
+<h1>{{Service}}</h1>
+<p><i>By: Austin Cory Bart, Dr. Tony Allevato, Dr. Eli Tilevich, Dr. Clifford Shaffer, and Dr. Simin Hall.</i></p>
+
+<p>{{Description}}. This is the Racket library.</p>
+
+<h2>Background</h2>
+
+<p>Many applications, especially those on mobile devices, need to access data from live web services in order to provide some meaningful functionality for the user. For example, the popular website Yelp has apps for Android and iOS that let the user navigate the listings and reviews of businesses in the user's local area or elsewhere.</p>
+
+<p>How does the app access this data over the web? For native apps that do more than just embed a web browser and use mobile stylesheets, they typically use web services. These services are designed to let a user/app submit a request for a piece of information (e.g., "restaurants in Blacksburg VA") and then return the requested data in a form that is much easier for the app to process – plain-text, XML, JSON, or some other structured data format.<p>
+
+<p>There are a number of difficulties involved with writing apps that use web services, however:</p>
+
+<ol>
+<li><b>You need to parse the data into a useful format.</b> The response you get back from a web service is not going to be nice clean Racket structs. Web services return text in some structured format, and you would need to parse that string to pull out the data you were interested in.</li>
+<li><b>Unit testing with live data is fragile.</b> Writing unit tests that rely on a web service is risky, because the data provided by the service might change as you develop the application. If you write assertions that assume that a business named "Stan's Food Restaurant" has 4 reviews and a rating of 3.5, you might be surprised later on to find your tests fail when someone submits a new review, even though nothing in your code has changed.</li>
+</ol>
+
+<h2>Overview of features</h2>
+
+<p>As an API in the RealTimeWeb project, this library allows you to:</p>
+
+<ol>
+<li>Parses the text response from the service and creates a nice set of Racket structs that represent common "entities" in the database, like {{structs}} and so forth.</li>
+<li>Defaults to using an internal cache of data that never changes that doesn't actually connect to the website, for testing purposes. Then, later on you only need to "flip a switch" to have the app use the real service in production. This gives you <a href='http://en.wikipedia.org/wiki/Idempotence#Computer_science_meaning'>Idempotencey</a>.</li>
+</ol>
+
+<p>Data returned using the API can either be:</p>
+<ul>
+<li>Raw strings (Json)</li>
+<li>a HashMap-based dictionary (Structured)</li>
+<li>Structs (Regular)</li>
+</ul>
+
+<h2>Simplest Usage</h2>
+
+<p>First, you should add the provided "weather.rkt" file and "cache.json" file to your working directory (where your code is stored).</p>
+
+<p>Now you can get an instance of the {{Service}} API:</p>
+
+<code>
+(require "weather.rkt")
+</code>
+
+<p>This gives you access to several new methods.</p>
+
+<code>
+(require "weather.rkt")
+
+(define todays-weather (get-weather "" ""))
+
+(weather? todays-weather) ; True
+(weather-temperature todays-weather)
+</code>
+
+<p>The default method is to get live data from the web service. However, you can also use the internal cache.</p>
+
+<code>
+(require "weather.rkt")
+
+(disconnect-weather-service)
+
+(define todays-weather (get-weather "" ""))
+
+(weather? todays-weather) ; True
+(weather-temperature todays-weather)
+</code>
+
+<p>If the data isn't able to be found in the cache, then an empty list will be returned.</p>

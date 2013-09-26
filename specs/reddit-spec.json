@@ -1,0 +1,84 @@
+{
+	"metadata": {
+		"name": "Reddit Service",
+		"description": "Get the Front Page of the internet."
+	},
+    "enums" : [{
+        "name": "SortMode",
+        "values" : ["top", "best", "hot", "new"]
+    }],
+	"domain": {
+		"name": "Post",
+        "description": "A link (or self-text) that has been submitted to Reddit.",
+		"fields": [
+            {"name": "ups", "type": "integer", "in": "data->ups", "description": "The number of upvotes associated with this Post."},
+            {"name": "downs", "type": "integer", "in": "data->downs",  "description": "The number of downvotes associated with this Post."},
+            {"name": "created", "type": "integer", "in": "data->created", "comment": "epoch time, save as long, convert to date", "description": "The date that this Post was created."},
+            {"name": "subreddit", "type": "string", "in": "data->subreddit", "description": "The subreddit that this Post was made in."},
+            {"name": "id", "type": "string", "in": "data->id", "description": "A unique ID for this Post. A combination of letters, numbers, and dashes."},
+            {"name": "title", "type": "string", "in": "data->title", "description": "The title of this Post."},
+            {"name": "author", "type": "string", "in": "data->author", "description": "The username of the author of this Post."},
+            {"name": "is self", "type": "boolean", "in": "data->is_self", "description": "Whether or not this Post was text (True), or a URL (False)."},
+            {"name": "is nsfw", "type": "boolean", "in": "data->over_18", "description": "Whether or not this Post is Not Safe for Work (NSFW)."},
+            {"name": "content", "type": "string", "in": "data->selftext", "comment": "if is self then use data->url", "description": "The text of the post, or a url if it is not a self Post."},
+            {"name": "permalink", "type": "string", "in": "data->permalink", "comment": "prepend reddit.com to this", "description": "A permanent url that directs to this Post."}
+	},{
+		"name": "Comment",
+        "description": "A Comment on either a Post or another Comment.",
+        "fields": [
+            {"name": "ups", "type": "integer", "in": "data->ups", "description": "The number of upvotes associated with this Comment."},
+            {"name": "downs", "type": "integer", "in": "data->downs",  "description": "The number of downvotes associated with this Comment."},
+            {"name": "created", "type": "integer", "in": "data->created", "comment": "epoch time, save as long, convert to date", "description": "The date that this Comment was created."},
+            {"name": "subreddit", "type": "string", "in": "data->subreddit", "description": "The subreddit that this Comment was made in."},
+            {"name": "id", "type": "string", "in": "data->id", "description": "A unique ID for this Comment. A combination of letters, numbers, and dashes."},
+            {"name": "author", "type": "string", "in": "data->author", "description": "The username of the author of this Post."},
+            {"name": "body", "type": "string", "in": "data->body", "description": "The text of this post, without any markup."},
+            {"name": "body html", "type": "string", "in": "data->body_html", "description": "The HTML text of this post."},
+            {"name": "replies", "type": "list(Comment)", "in": "data->replies->data->children", "comment": "filter by replies->data->children", "description": "A list of comments that are in reply to this one."}]
+	}},
+	"services": [{
+		"name": "Get Posts",
+		"url": "http://www.reddit.com/r/<subreddit>/<sort_mode>.json",
+		"type": "get",
+		"description": "Retrieves all the top posts",
+        "comment": "Need to filter by data->children",
+		"output": "list(Post)",
+		"inputs": [{
+			"name": "subreddit",
+			"type": "string",
+			"param": true,
+			"indexable": true,
+            "description": "The subreddit that Posts will be returned from. Use \"all\" to return results from all subreddits."
+		},
+		{
+			"name": "sort_mode",
+            "clean": "sort mode",
+			"param": true,
+			"type": "string",
+			"indexable": true,
+            "description": "The order that the Posts will be sorted by. Options are: \"top\" (ranked by upvotes minus downvotes), \"best\" (similar to top, except that it uses a more complicated algorithm to have good posts jump to the top and stay there, and bad comments to work their way down, see http://blog.reddit.com/2009/10/reddits-new-comment-sorting-system.html), \"hot\" (similar to \"top\", but weighted by time so that recent, popular posts are put near the top), \"new\" (posts will be sorted by creation time)."
+		}]
+	},{
+        "name": "Get Comments",
+		"url": "http://www.reddit.com/r/comments/<id>/<sort_mode>.json",
+		"type": "get",
+		"description": "Retrieves comments for a post",
+        "comment": "Need to filter by data->children. Also, skip the first element, and the last element.",
+		"output": "list(Comment)",
+		"inputs": [{
+            "name": "id",
+            "type": "string",
+            "param": true,
+            "indexable": true,
+            "description": "The unique id of a Post from which Comments will be returned."
+        },
+		{
+			"name": "sort_mode",
+            "clean": "sort mode",
+			"param": true,
+			"type": "string",
+			"indexable": true,
+            "description": "The order that the Posts will be sorted by. Options are: \"top\" (ranked by upvotes minus downvotes), \"best\" (similar to top, except that it uses a more complicated algorithm to have good posts jump to the top and stay there, and bad comments to work their way down, see http://blog.reddit.com/2009/10/reddits-new-comment-sorting-system.html), \"hot\" (similar to \"top\", but weighted by time so that recent, popular posts are put near the top), \"new\" (posts will be sorted by creation time)."
+		}]
+    }]
+}
