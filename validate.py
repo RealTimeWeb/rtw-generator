@@ -1,5 +1,6 @@
 from itertools import chain
 from auxiliary import clean_json
+import re
 import sys
 # validate spec
 
@@ -138,9 +139,9 @@ def validate_function(name, data, warning, error, location):
         require_field(warning, error, "verb", "{}.verb".format(location), data, set(("get", "post", "delete", "put")))
         require_field(warning, error, "format", "{}.format".format(location), data, set(("json", "xml", "html", "csv", "text")))
         require_field(warning, error, "output", "{}.output".format(location), data, str)
-        recommend_field(warning, error, "loop", "{}.loop".format(location), 
-                        data, set(("repeat", "restart", "empty")),
-                        not_found = "{}.loop will default to repeat.".format(name))
+        #recommend_field(warning, error, "loop", "{}.loop".format(location), 
+        #                data, set(("repeat", "restart", "empty")),
+        #                not_found = "{}.loop will default to repeat.".format(name))
         recommend_field(warning, error, 
                         "description", 
                         "{}.description".format(name),
@@ -148,6 +149,13 @@ def validate_function(name, data, warning, error, location):
         typecheck_field(warning, error, "comment", "{}.comment".format(location), data, str)
         if "inputs" in data:
             validate_list("{}.inputs".format(location), "inputs", data, validate_input, warning, error)
+            # Ensure that every url has the requsite paths!
+            if "url" in data:
+                url_input_names = set(map(str, re.findall("<(.*?)>", data["url"])))
+                given_input_names = set([input['path'] for input in data["inputs"].values() if 'path' in input])
+                if not url_input_names.issubset(given_input_names):
+                    error("Expected full list of url parameters {} for {}, given only {}.".format(list(url_input_names), location, list(given_input_names)))
+                
     else:
         error(type_error(location, dict, type(data))) 
 

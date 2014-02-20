@@ -13,126 +13,37 @@ public class {{object.name}} {
     //{{object.comment}}
     {% endif %}
 	
+	{% for field in object.fields %}
+    {% if field.comment %}
+    //{{field.comment}}
+    {% endif %}
+    private {{field.type}} {{field.name}};
+    {% endfor %}
 	
-	private double minimumLongitude;
-	private double minimumLatitude;
-	private double minimumDepth;
-	private double maximumLongitude;
-	private double maximumLatitude;
-	private double maximumDepth;
-	
-	
-	/**
-	 * The lower longitude (West) component.
-	
-	 * @return double
-	 */
-	public double getMinimumLongitude() {
-		return this.minimumLongitude;
-	}
-	
-	/**
-	 * 
-	 * @param minimumLongitude The lower longitude (West) component.
-	 */
-	public void setMinimumLongitude(double minimumLongitude) {
-		this.minimumLongitude = minimumLongitude;
-	}
+    {% for field in object.fields %}
+    /**
+     * {{field.description}}
+     * @return {{field.type}}
+     */
+    public {{field.type}} {{field.getter}}() {
+        return this.{{field.name}};
+    }
+    
+    /**
+     * @param {{field.name}} {{field.description}}
+     */
+    public void {{field.setter}}({{field.type}} {{field.name}}) {
+        this.{{field.name}} = {{field.name}};
+    }
+    {% endfor %}
 	
 	/**
-	 * The lower latitude (South) component.
-	
-	 * @return double
-	 */
-	public double getMinimumLatitude() {
-		return this.minimumLatitude;
-	}
-	
-	/**
-	 * 
-	 * @param minimumLatitude The lower latitude (South) component.
-	 */
-	public void setMinimumLatitude(double minimumLatitude) {
-		this.minimumLatitude = minimumLatitude;
-	}
-	
-	/**
-	 * The lower depth (closer or farther from the surface) component.
-	
-	 * @return double
-	 */
-	public double getMinimumDepth() {
-		return this.minimumDepth;
-	}
-	
-	/**
-	 * 
-	 * @param minimumDepth The lower depth (closer or farther from the surface) component.
-	 */
-	public void setMinimumDepth(double minimumDepth) {
-		this.minimumDepth = minimumDepth;
-	}
-	
-	/**
-	 * The higher longitude (East) component.
-	
-	 * @return double
-	 */
-	public double getMaximumLongitude() {
-		return this.maximumLongitude;
-	}
-	
-	/**
-	 * 
-	 * @param maximumLongitude The higher longitude (East) component.
-	 */
-	public void setMaximumLongitude(double maximumLongitude) {
-		this.maximumLongitude = maximumLongitude;
-	}
-	
-	/**
-	 * The higher latitude (North) component.
-	
-	 * @return double
-	 */
-	public double getMaximumLatitude() {
-		return this.maximumLatitude;
-	}
-	
-	/**
-	 * 
-	 * @param maximumLatitude The higher latitude (North) component.
-	 */
-	public void setMaximumLatitude(double maximumLatitude) {
-		this.maximumLatitude = maximumLatitude;
-	}
-	
-	/**
-	 * The higher depth (closer or farther from the surface) component.
-	
-	 * @return double
-	 */
-	public double getMaximumDepth() {
-		return this.maximumDepth;
-	}
-	
-	/**
-	 * 
-	 * @param maximumDepth The higher depth (closer or farther from the surface) component.
-	 */
-	public void setMaximumDepth(double maximumDepth) {
-		this.maximumDepth = maximumDepth;
-	}
-	
-	
-	
-	/**
-	 * The longitudinal, latitudinal, and depth of the region required to display all the earthquakes.
+	 * A string representation of this object.
 	
 	 * @return String
 	 */
 	public String toString() {
-		return "BoundingBox[" + minimumLongitude + ", " + minimumLatitude + ", " + minimumDepth + ", " + maximumLongitude + ", " + maximumLatitude + ", " + maximumDepth + "]";
+		return "{{object.name}}[" + {{ object.fields|join(" + ") }} + "]";
 	}
 	
 	/**

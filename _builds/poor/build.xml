@@ -1,14 +1,14 @@
 <?xml version="1.0"?>
-<project name="Build {{ metadata.name }}" basedir="." default="dist">
+<project name="Build Earthquake Watcher" basedir="." default="dist">
 	<description>
-		A build file to generate a distributable .jar for the RealTimeWeb {{ metadata.name }}.
+		A build file to generate a distributable .jar for the RealTimeWeb Earthquake Watcher.
 	</description>
 	
 	<property name="src" location="src"/>
 	<property name="bin" location="bin"/>
 	<property name="dist" location="dist"/>
 	<property name="docs" location="docs"/>
-	<property name="ver" value="{{ metadata.version }}"/>
+	<property name="ver" value="1.0"/>
 	<!-- <propertyfile file=".properties">
 		<entry key="docs" value="docs/" />
 	</propertyfile>-->
@@ -39,7 +39,7 @@
 		      sourcepath='src'
 		      packagenames='*.*' 
 		      destdir='${docs}'
-		      windowtitle='{{ metadata.name  }}: version ${ver}'
+		      windowtitle='Earthquake Watcher: version ${ver}'
 		      noqualifier='java.*:javax.*:com.sun.*'   
 		      linksource='true'
 		    />
@@ -49,21 +49,21 @@
 	    <!-- Create the distribution directory -->
 	    <mkdir dir="${dist}"/>
 
-	    <!-- Put everything in ${build} into the {{ metadata.name | flat_case }}-${DSTAMP}.jar file -->
-	    <jar jarfile="${dist}/{{ metadata.name | flat_case }}-${ver}.jar" basedir="${bin}">
+	    <!-- Put everything in ${build} into the earthquakewatcher-${DSTAMP}.jar file -->
+	    <jar jarfile="${dist}/earthquakewatcher-${ver}.jar" basedir="${bin}">
 	    	<fileset dir="bin" includes="bin/*.class" />
 			<zipgroupfileset dir="libs/" includes="*.jar" />
 		</jar>
 		
-		<!-- Put everything in ${build} and ${docs} into the {{ metadata.name | flat_case }}-doc-${DSTAMP}.jar file -->
-		<jar jarfile="${dist}/{{ metadata.name | flat_case }}-doc-${ver}.jar" basedir="${bin}">
+		<!-- Put everything in ${build} and ${docs} into the earthquakewatcher-doc-${DSTAMP}.jar file -->
+		<jar jarfile="${dist}/earthquakewatcher-doc-${ver}.jar" basedir="${bin}">
 	    	<fileset dir="bin" includes="bin/*.class" />
 			<fileset dir="docs" includes="**" />
 			<zipgroupfileset dir="libs/" includes="*.jar" />
 		</jar>
 		
-		<!-- Put everything in ${build} and ${src} into the {{ metadata.name | flat_case }}-src-${DSTAMP}.jar file -->
-		<jar jarfile="${dist}/{{ metadata.name | flat_case }}-src-${ver}.jar" basedir="${bin}">
+		<!-- Put everything in ${build} and ${src} into the earthquakewatcher-src-${DSTAMP}.jar file -->
+		<jar jarfile="${dist}/earthquakewatcher-src-${ver}.jar" basedir="${bin}">
 	    	<fileset dir="bin" includes="bin/*.class" />
 			<fileset dir="src" includes="**" />
 			<zipgroupfileset dir="libs/" includes="*.jar" />

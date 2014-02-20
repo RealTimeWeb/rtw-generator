@@ -2,6 +2,7 @@ from validate import validate_spec
 from auxiliary import clean_json
 import re
 import sys
+from itertools import chain
                        
 def flatten_list(a_type):
     if a_type.endswith("[]"):
@@ -73,12 +74,15 @@ def compile_function(name, data):
     function.output = data["output"]
     function.description = data.get("description", "")
     function.comment = data.get("comment", "")
-    function.loop = data.get("loop", "repeat")
     function.authentication = data.get("authentication", None)
-    inputs = [compile_input(*data) for data in data["inputs"].iteritems()]
-    function.url_inputs = [input for input in inputs if input.name in url_input_names]
-    function.payload_inputs = [input for input in inputs if input.name not in url_input_names]
-    function.dependencies = set([flatten_list(input.name) for input in inputs] + [flatten_list(function.output)])
+    if "inputs" in data:
+        inputs = [compile_input(*data) for data in data["inputs"].iteritems()]
+    else:
+        inputs = []
+    # Ensure the url arguments are in the proper order - None indicates missing argument!
+    function.url_inputs = [next((i for i in inputs if i.path == input), None) for input in url_input_names]
+    function.payload_inputs = [input for input in inputs if input.path not in url_input_names]
+    function.dependencies = set([flatten_list(input.type) for input in inputs] + [flatten_list(function.output)])
     return function
 
 def compile_spec(spec):
@@ -87,14 +91,12 @@ def compile_spec(spec):
     package.enums = [compile_enum(*data) for data in spec["enums"].iteritems()]
     package.objects = [compile_object(*data) for data in spec["objects"].iteritems()]
     package.functions = [compile_function(*data) for data in spec["functions"].iteritems()]
+    #package.dependencies = chain(*[function.dependencies for function in package.functions],
+    #                             *[obj.dependencies for obj in package.objects])
     return package
     
 if __name__ == "__main__":
     import json
     input = clean_json(json.load(open(sys.argv[1],'r')))
     new_package = compile_spec(input)
-        
-#from jinja2 import Template
 
-#template = Template('Hello {{ name }}!')
-#template.render(name='John Doe')

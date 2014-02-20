@@ -2,19 +2,11 @@ Jinja2 templating
 Generate automatic cache building script
 XML/HTML/JSON/CSV/Raw Text support
     specify path for each variable
-Racket/Python/Java/JavaScript
-    Java/Python
-        Synchronous/Asychronous
-        Singleton
-    Racket
-        Separate files
+Racket/Python/Java/JavaScript/R
+    Specify files / Don't specify files
+    Singleton / Instances
 Limit dependencies
 Two patterns
-    Persistent - treat data as if it never changes
-    Dynamic - data may change, but not every single time - based on actual time
-    Stream - clock-based returns - based on calls
-    lookup - specify that a method's result will always be the same
-    poll - specify that a method should return semi-idempotent results
     Loop behavior
         repeat final element
         restart from beginning
@@ -23,11 +15,13 @@ JSON rendering
     http://marianoguerra.github.io/json.human.js/
 Some way of editing data in the files
     Data file format
-        Title:
-        Description:
-        Version:
-        Author:
-        Contact:
+        Library: Weather
+        Name: Bad weather
+        Description: This dataset contains lots of really bad weather
+        Version: 1
+        Author: acbart
+        Contact: acbart@vt.edu
+        Pattern: repeat
         Data:
             key -> [output, output, output]
 Racket event updates
