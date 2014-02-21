@@ -6,6 +6,18 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+{% if object.format == "xml" %}
+import org.w3c.dom.NodeList;
+import org.w3c.dom.Node;
+import org.w3c.dom.Document;
+import com.sun.org.apache.xpath.internal.NodeSet;
+import javax.xml.xpath.XPath;
+import javax.xml.xpath.XPathConstants;
+import javax.xml.xpath.XPathFactory;
+{% elif object.format == "html" %}
+import org.htmlcleaner.TagNode;
+{% endif %}
+
 {% for dependency in object.dependencies if not (dependency | is_builtin) -%}
 import realtimeweb.{{ metadata.name | flat_case }}.domain.{{dependency | camel_case_caps}};
 {% endfor %}
@@ -80,6 +92,22 @@ public class {{ object.name | camel_case_caps }} {
         {% for field in object.fields -%}
         {% if field.type | is_list %}
         NodeList items = (NodeList) xPath.evaluate("{{ field.path }}", raw, XPathConstants.NODESET);
+        this.{{ field.name | camel_case }} = new {{ field.type | to_java_type }}();
+        for (int i = 0; i < items.getLength(); i++) {
+            Node aNode = items.get(i);
+            this.{{ field.name | camel_case }}.add(new {{ field.type | strip_list | to_java_type }}({{ field.name | camel_case }}Iter.next()));
+        }
+        {%- elif field.type | is_builtin %}
+        this.{{ field.name | camel_case }} = xPath.evaluate("{{ field.path }}", raw, {{ field.type | create_xml_conversion }});
+        {%- else %}
+        this.{{ field.name | camel_case }} = new {{ field.type | camel_case_caps }}(xPath.evaluate("{{ field.path }}", raw, XPathConstants.NODE));
+        {%- endif %}
+        {%- endfor %}
+    {% elif object.format == "html" %}
+    public {{ object.name | camel_case_caps }}(TagNode raw) {
+        {% for field in object.fields -%}
+        {% if field.type | is_list %}
+        Object[] items = (NodeList) xPath.evaluate("{{ field.path }}", raw, XPathConstants.NODESET);
         this.{{ field.name | camel_case }} = new {{ field.type | to_java_type }}();
         for (int i = 0; i < items.getLength(); i++) {
             Node aNode = items.get(i);
