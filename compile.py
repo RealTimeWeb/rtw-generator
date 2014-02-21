@@ -92,8 +92,14 @@ def compile_function(name, data):
 def compile_spec(spec):
     package = Package()
     package.metadata = compile_metadata(spec["metadata"])
-    package.enums = [compile_enum(*data) for data in spec["enums"].iteritems()]
-    package.objects = [compile_object(*data) for data in spec["objects"].iteritems()]
+    if "enums" in spec:
+        package.enums = [compile_enum(*data) for data in spec["enums"].iteritems()]
+    else:
+        package.enums = []
+    if "objects" in spec:
+        package.objects = [compile_object(*data) for data in spec["objects"].iteritems()]
+    else:
+        package.objects = []
     package.functions = [compile_function(*data) for data in spec["functions"].iteritems()]
     package.formats_required = set(function.format for function in package.functions)
     #package.dependencies = chain(*[function.dependencies for function in package.functions],

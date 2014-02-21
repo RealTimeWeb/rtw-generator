@@ -7,14 +7,36 @@ import java.util.List;
 import java.util.Map;
 
 
+import org.htmlcleaner.TagNode;
+
+
+import realtimeweb.earthquakewatcher.domain.Earthquake;
+
 /**
  * A list of authors.
  */
 public class MyAuthors {
 	
+    private String test;
     private ArrayList<String> books;
+    private Earthquake other;
     private ArrayList<Integer> years;
     
+    
+    /*
+     * @return amazing
+     */
+    public String getTest() {
+        return this.test;
+    }
+    
+    /*
+     * @param amazing
+     * @return String
+     */
+    public void setTest(String test) {
+        this.test = test;
+    }
     
     /*
      * @return All the authors.
@@ -29,6 +51,21 @@ public class MyAuthors {
      */
     public void setBooks(ArrayList<String> books) {
         this.books = books;
+    }
+    
+    /*
+     * @return amazing
+     */
+    public Earthquake getOther() {
+        return this.other;
+    }
+    
+    /*
+     * @param amazing
+     * @return Earthquake
+     */
+    public void setOther(Earthquake other) {
+        this.other = other;
     }
     
     /*
@@ -53,29 +90,30 @@ public class MyAuthors {
 	 * @return String
 	 */
 	public String toString() {
-		return "Report[" +books+", "+years+"]";
+		return "Report[" +test+", "+books+", "+other+", "+years+"]";
 	}
 	
 	/**
-	 * Internal constructor to create a MyAuthors from a xml representation.
+	 * Internal constructor to create a MyAuthors from a html representation.
 	 * @param map The raw json data that will be parsed.
 	 * @return 
 	 */
     
-    public MyAuthors(Node raw) {
-        XPath xPath =  XPathFactory.newInstance().newXPath();
+    public MyAuthors(TagNode raw) {
         
-        NodeList items = (NodeList) xPath.evaluate("/bookstore/book/author", raw, XPathConstants.NODESET);
+        this.test = rawraw.evaluateXPath("/bookstore/").toString();
+        Object[] booksItems = raw.evaluateXPath("/bookstore/book/author");
         this.books = new ArrayList<String>();
-        for (int i = 0; i < items.getLength(); i++) {
-            Node aNode = items.get(i);
-            this.books.add(new String(booksIter.next()));
+        for (int i = 0; i < booksItems.length; i++) {
+            TagNode aNode = (TagNode)booksItems[i];
+            this.books.add((aNode.toString()));
         }
-        NodeList items = (NodeList) xPath.evaluate("/bookstore/book/year", raw, XPathConstants.NODESET);
+        this.other = new Earthquake((TagNode) raw.evaluateXPath("/bookstore/"));
+        Object[] yearsItems = raw.evaluateXPath("/bookstore/book/year");
         this.years = new ArrayList<Integer>();
-        for (int i = 0; i < items.getLength(); i++) {
-            Node aNode = items.get(i);
-            this.years.add(new Integer(yearsIter.next()));
+        for (int i = 0; i < yearsItems.length; i++) {
+            TagNode aNode = (TagNode)yearsItems[i];
+            this.years.add(Integer.parseInt(aNode.toString()));
         }
     
 	}	

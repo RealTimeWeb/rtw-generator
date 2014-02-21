@@ -1,5 +1,6 @@
 import json
 import sys
+from itertools import tee, izip
 from urlparse import urlparse
 from urllib import quote_plus, urlencode
 from textwrap import wrap
@@ -15,6 +16,12 @@ env.filters['camel_case'] = camel_case
 env.filters['snake_case'] = snake_case
 env.filters['kebab_case'] = kebab_case
 env.filters['flat_case'] = flat_case
+
+def pairwise(iterable):
+    "s -> (s0,s1), (s1,s2), (s2, s3), ..."
+    a, b = tee(iterable)
+    next(b, None)
+    return izip(a, b)
 
 conversion_mapping = { ("string", "integer") : "Integer.parseInt",
                        ("string", "float") : "Double.parseDouble",
@@ -49,14 +56,23 @@ gson_conversions = { "string" : "getAsString",
                      "long" : "getAsLong"}
 
 def parse_json_path(path):
-    result = ""
+    elements = []
     for keys in path.split("."):
         while keys:
             left, sep, keys = keys.partition("[")
             val, sep, keys = keys.partition("]")
-            result += '.get("{}")'.format(left)
+            if left:
+                elements.append('"{}"'.format(left))
             if val:
-                result += ".get({})".format(val)
+                elements.append(int(val))
+    result = "raw"
+    if elements:
+        for item in elements[:-1]:
+            if isinstance(item, str):
+                result = '((Map<String, Object>) {}.get({}))'.format(result, item)
+            else:
+                result = '((List<Object>) {}.get({}))'.format(result, item)
+        result = '{}.get({})'.format(result, elements[-1])
     return result
 
 def convert_url_parameters(url):
@@ -78,11 +94,17 @@ def create_json_conversion(data, type):
     if is_list(type):
         type = strip_list(type)
     if type in json_conversion:
-        return "{}(raw{}.toString())".format(json_conversion[type], data)
+        return "{}({}.toString())".format(json_conversion[type], data)
     elif type == "string":
-        return "raw{}.toString()".format(data)
+        return "{}.toString()".format(data)
     else:
-        return "new {}(raw{})".format(camel_case_caps(type), data)
+        return "new {}((Map<String, Object>){})".format(camel_case_caps(type), data)
+
+def convert_builtin(type):
+    if type == "string":
+        return ""
+    else:
+        return json_conversion[type]
 
 def create_xml_conversion(data, type):
     if is_list(type):
@@ -111,6 +133,7 @@ env.filters['strip_list'] = strip_list
 env.filters['parse_json_path'] = parse_json_path
 env.filters['create_json_conversion'] = create_json_conversion
 env.filters['create_xml_conversion'] = create_xml_conversion
+env.filters['convert_builtin'] = convert_builtin
 
 def build_metafiles(model):
     return {'.classpath': env.get_template('.classpath',globals=model).render(),
@@ -134,7 +157,7 @@ def build_classes(model):
     return files
                 
 def copy_file(filename):
-    with open(filename, 'r') as input:
+    with open(filename, 'rb') as input:
         return input.read()
 
 def build_java(model):

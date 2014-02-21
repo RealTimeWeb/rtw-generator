@@ -12,9 +12,11 @@
 	"objects": {
         "My authors": {
             "description": "A list of authors.",
-            "format": "xml",
+            "format": "html",
             "fields": {
                 "books": {"type": "string[]", "path": "/bookstore/book/author", "description": "All the authors."},
+                "test": {"type": "string", "path": "/bookstore/", "description": "amazing"},
+                "other": {"type": "Earthquake", "path": "/bookstore/", "description": "amazing"},
                 "years": {"type": "integer[]", "path": "/bookstore/book/year", "description": "All the years."}
                 }},
 		"Report": {

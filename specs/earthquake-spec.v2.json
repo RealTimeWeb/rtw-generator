@@ -1,0 +1,79 @@
+{
+	"metadata": {
+		"name": "Earthquake Watcher",
+        "version": 1.0,
+        "author": "Cory Bart",
+        "contact": "acbart@vt.edu",
+        "description": "Get the latest information about earthquakes around the world."
+	},
+    "enums": {
+        "sort mode" : ["top", "hot", "new", "best", "worst"]
+    },
+	"objects": {
+		"Report": {
+            "description": "Information about earthquakes matching certain criteria, including the area that they occurred.",
+            "format": "json",
+            "fields": {
+                "area": {"type": "bounding box", "path": "bbox", "description": "A region that contains all the earthquakes."},
+                "earthquakes": { "type": "Earthquake[]", "path": "features", "description": "A list of the earthquakes."},
+                "title": {"type": "string", "path": "metadata.title", "description": "A human-readable title that describes this data."}}},
+        "Earthquake": {
+            "description": "Information about a specific earthquake.",
+            "format": "json",
+            "fields": {
+                "location": {"type": "coordinate", "path": "geometry.coordinates", "description": "The location of the earthquake."},
+                "magnitude": {"type": "float", "hint": {"min": 0, "max": 10}, "path": "properties.mag", "description": "The magnitude of the earthquake on the Richter Scale."},
+                "location description": {"type": "string", "path": "properties.place", "description": "A human-readable description of the location."},
+                "time": {"type": "long", "path": "properties.time", "description": "The epoch time (http://en.wikipedia.org/wiki/Unix_time) when this earthquake occurred."},
+                "url": {"type": "string", "path": "properties.url", "description": "A webpage with more information about the earthquake."},
+                "felt reports": {"type": "integer", "path": "properties.felt", "description": "The total number of \"Felt\" reports submitted, or null if the data is not available."},
+                "maximum reported intensity": {"type": "float", "path": "properties.cdi", "description": "The maximum reported intensity for this earthquake, or null if the data is not available. While typically reported as a roman numeral, intensity is reported here as a decimal number. More information can be found at http://earthquake.usgs.gov/learn/topics/mag_vs_int.php"},
+                "maximum estimated intensity": {"type": "float", "path": "properties.mmi", "description": "The maximum estimated instrumental intensity for the event, or null if the data is not available. While typically reported as a roman numeral, intensity is reported here as the decimal equivalent. More information can be found at http://earthquake.usgs.gov/learn/topics/mag_vs_int.php"},
+                "alert level": {"type": "string", "path": "properties.alert", "description": "A color string (one of \"green\", \"yellow\", \"orange\", \"red\") indicating how dangerous the quake was, or null if the data is not available. More information about this kind of alert is available at http://earthquake.usgs.gov/research/pager/"},
+                "event source": {"type": "string", "path": "properties.status", "description": "Either \"AUTOMATIC\", \"PUBLISHED\", or \"REVIEWED\". Indicates how the earthquake was identified and whether it was reviewed by a human."},
+                "significance": {"type": "integer", "path": "properties.sig", "description": "A number describing how significant the event is. Larger numbers indicate a more significant event. This value is determined on a number of factors, including: magnitude, maximum estimated intensity, felt reports, and estimated impact."},
+                "id": {"type": "string", "path": "id", "description": "A uniquely identifying id for this earthquake."},
+                "distance": {"type": "float", "path": "properties.dmin", "description": "Horizontal distance from the epicenter to the nearest station (in degrees), or null if the data is not available. 1 degree is approximately 111.2 kilometers. In general, the smaller this number, the more reliable is the calculated depth of the earthquake."},
+                "root mean square": {"type": "float", "path": "properties.rms", "description": "The root-mean-square (RMS) travel time residual, in sec, using all weights. This parameter provides a measure of the fit of the observed arrival times to the predicted arrival times for this location. Smaller numbers reflect a better fit of the data. The value is dependent on the accuracy of the velocity model used to compute the earthquake location, the quality weights assigned to the arrival time data, and the procedure used to locate the earthquake."},
+                "gap": {"type": "float", "path": "properties.gap", "description": "The largest azimuthal gap between azimuthally adjacent stations (in degrees), or null if the data is not available. In general, the smaller this number, the more reliable is the calculated horizontal position of the earthquake."}}},
+        "Coordinate": { 
+            "description": "The longitudinal, latitudinal, and depth where the earthquake occurred.","comment": "For some unclear reason, these are stored as a list instead of a dictionary.",
+            "format": "json",
+            "fields": {
+                "longitude": {"type": "float", "hint": "longitude", "path": "[0]", "description": "The longitude (West-North) component."},
+                "latitude": {"type": "float", "hint": "latitude", "path": "[1]", "description": "The latitude (South-North) component."},
+                "depth": {"type": "float", "path": "[2]", "description": "The depth (closer or farther from the surface) component."}}},
+        "Bounding Box": {
+            "description": "The longitudinal, latitudinal, and depth of the region required to display all the earthquakes.",
+            "comment": "For some unclear reason, these are stored as a list instead of a dictionary.",
+            "format": "json",
+            "fields": {
+                "minimum longitude": { "type": "float", "hint": "longitude", "path": "[0]", "description": "The lower longitude (West) component."},
+                "minimum latitude": { "type": "float", "hint": "latitude", "path": "[1]", "description": "The lower latitude (South) component."},
+                "minimum depth": { "type": "float", "path": "[2]", "description": "The lower depth (closer or farther from the surface) component."},
+                "maximum longitude": { "type": "float", "hint": "longitude", "path": "[0]", "description": "The higher longitude (East) component."},
+                "maximum latitude": { "type": "float", "hint": "latitude", "path": "[1]", "description": "The higher latitude (North) component."},
+                "maximum depth": {"type": "float", "path": "[2]", "description": "The higher depth (closer or farther from the surface) component."}}}
+	},
+	"functions": {
+        "Get Earthquakes": {
+            "url": "http://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/<threshold>_<time>.geojson",
+            "verb": "get",
+            "format": "json",
+            "post": "",
+            "description": "Retrieves information about earthquakes around the world.",
+            "comment": "Should really make these enums",
+            "output": "Report",
+            "inputs": {
+                "threshold": {
+                    "path": "threshold",
+                    "type": "string",
+                    "description": "A string indicating what kind of earthquakes to report. Must be either \"significant\" (only significant earthquakes), \"all\" (all earthquakes, regardless of significance), \"4.5\", \"2.5\", or \"1.0\". Note that for the last three, all earthquakes at and above that level will be reported.",
+                    "default": 5,
+                    "indexable": true},
+                "time": {
+                    "path": "time",
+                    "type": "string",
+                    "description": "A string indicating the time range of earthquakes to report. Must be either \"hour\" (only earthquakes in the past hour), \"day\" (only earthquakes that happened today), \"week\" (only earthquakes that happened in the past 7 days), or \"month\" (only earthquakes that happened in the past 30 days).",
+                    "indexable": true}}}}
+}

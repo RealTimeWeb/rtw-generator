@@ -13,6 +13,7 @@ import javax.xml.xpath.XPathFactory;
 import realtimeweb.{{ metadata.name | flat_case }}.domain.*;
 import realtimeweb.stickyweb.StickyWeb;
 import realtimeweb.stickyweb.StickyWebRequest;
+import realtimeweb.stickyweb.exceptions.StickyWebException;
 import realtimeweb.stickyweb.exceptions.StickyWebDataSourceNotFoundException;
 import realtimeweb.stickyweb.exceptions.StickyWebDataSourceParseException;
 import realtimeweb.stickyweb.exceptions.StickyWebInternetException;
@@ -57,6 +58,10 @@ public class {{ metadata.name | camel_case_caps }} {
 		this.online = false;
 		this.connection = new StickyWeb(cache);
 	}
+    
+    public static void main(String[] args) {
+        {{ metadata.name | camel_case_caps }} {{ metadata.name | camel_case }} = new {{ metadata.name | camel_case_caps }}();
+    }
     
     {% for function in functions %}
     /**

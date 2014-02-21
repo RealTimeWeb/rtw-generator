@@ -32,7 +32,7 @@ def build_dir(files, prepend):
         for filename, data in files.iteritems():
             filename = os.path.join(prepend, filename)
             ensure_dir(filename)
-            with open(filename, "w+") as output:
+            with open(filename, "wb+") as output:
                 output.write(data)
     except Exception, e:
         error_log.append(traceback.format_exc())

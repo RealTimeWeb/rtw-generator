@@ -7,6 +7,8 @@ import java.util.List;
 import java.util.Map;
 
 
+
+
 /**
  * The longitudinal, latitudinal, and depth of the region required to display all the earthquakes.
  */

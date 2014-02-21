@@ -1,0 +1,83 @@
+{
+    "metadata": {
+		"name": "Weather Service",
+		"description": "Get a report of present weather and forecast data.",
+        "version": 2.0,
+        "author": "Austin Cory Bart",
+        "contact": "acbart@vt.edu"
+	},
+	"objects": {
+        "weather": {
+            "description": "A structured representation the current weather.",
+            "format": "json",
+            "fields": {
+                "temp": {"type": "integer", "path": "Temp", "description": "The current temperature (in Fahrenheit)."},
+                "dewpoint": {"type": "integer", "path": "Dewp", "description": "The current dewpoint temperature (in Fahrenheit)."},
+                "humidity": {"type": "integer", "path": "Relh", "description": "The current relative humidity (as a percentage)."},
+                "wind speed": {"type": "integer", "path": "Winds", "description": "The current wind speed (in miles-per-hour)."},
+                "wind direction": {"type": "integer", "path": "Windd", "description": "The current wind direction (in degrees)."},
+                "description": {"type": "string", "path": "Weather", "description": "A human-readable description of the current weather."},
+                "image url": {"type": "string", "path": "Weatherimage", "description": "A url pointing to a picture that describes the weather."},
+                "visibility": {"type": "float", "path": "Visibility", "description": "How far you can see (in miles)."},
+                "windchill": {"type": "integer", "path": "WindChill", "description": "The perceived temperature (in Fahrenheit)."},
+                "pressure": {"type": "float", "path": "SLP", "description": "The barometric pressure (in inches)."}
+                }},
+        "Forecast": {
+            "description": "A prediction for future weather.",
+            "format": "json",
+            "fields": {
+                "period name": {"type": "string", "path": "time.startPeriodName", "description": "A human-readable name for this time period (e.g. Tonight or Saturday)."},
+                "period time": {"type": "string", "path": "time.startValidTime", "description": "A string representing the time that this period starts. Encoded as YYYY-MM-DDTHH:MM:SS, where the T is not a number, but a always present character (e.g. 2013-07-30T18:00:00)."},
+                "temperature label": {"type": "string", "path": "time.tempLabel", "description": "Either 'High' or 'Low', depending on whether or not the predicted temperature is a daily high or a daily low."},
+                "temperature": {"type": "integer", "path": "data.temperature", "description": "The predicted temperature for this period (in Fahrenheit)."},
+                "probability of precipitation": {"type": "integer", "path": "data.pop", "description": "The probability of precipitation for this period (as a percentage).", "comment": "This value can sometimes be null, so you should set that to 0."},
+                "description": {"type": "string", "path": "data.weather", "description": "A human-readable description of the predicted weather for this period."},
+                "image url": {"type": "string", "path": "data.iconLink", "description": "A url pointing to a picture that describes the predicted weather for this period."},
+                "long description": {"type": "string", "path": "data.text", "description": "A more-detailed, human-readable description of the predicted weather for this period."}
+                }},
+        "Location" : {
+            "description": "A detailed description of a location",
+            "format": "json",
+            "fields": {
+                "latitude": {"type": "float", "path": "latitude", "description": "The latitude (up-down) of this location."},
+                "longitude": {"type": "float", "path": "longitude", "description": "The longitude (left-right) of this location."},
+                "elavation": {"type": "integer", "path": "elevation", "description": "The height above sea-level (in feet)."},
+                "name": {"type": "string", "path": "areaDescription", "description": "The city and state that this location is in."}
+                }},
+        "Report": {
+            "description": "A container for the weather, forecasts, and location information.",
+            "format": "json",
+            "fields": {
+                "weather": {"type": "Weather", "path": "currentobservation", "description": "The current weather for this location."},
+                "forecasts": {"type": "Forecast[]", "path": "", "description": "The forecast for the next 7 days and 7 nights."},
+                "location": {"type": "Location", "path": "location", "description": "More detailed information on this location."}
+                }}
+	},
+	"functions": {
+        "Get Report": {
+            "url": "http://forecast.weather.gov/MapClick.php",
+            "verb": "get",
+            "format": "json",
+            "description": "Gets a report on the current weather, forecast, and more detailed information about the location.",
+            "output": "Report",
+            "inputs": {
+                "FcstType": {
+                    "type": "string",
+                    "indexable": false,
+                    "default": "json",
+                    "hidden": true,
+                    "path": "FcstType",
+                    "comment": "You can't actually change this."},
+                "latitude": {
+                    "path": "lat",
+                    "type": "float",
+                    "indexable": true,
+                    "description": "The latitude (up-down) of the location to get information about."},
+                "longitude": {
+                    "path": "lon",
+                    "type": "float",
+                    "indexable": true,
+                    "description": "The longitude (left-right) of the location to get information about."}
+                }}
+        }
+}

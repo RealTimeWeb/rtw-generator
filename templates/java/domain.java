@@ -3,6 +3,7 @@ package realtimeweb.{{ metadata.name | flat_case }}.domain;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -78,9 +79,9 @@ public class {{ object.name | camel_case_caps }} {
         {% for field in object.fields -%}
         {% if field.type | is_list %}
         this.{{ field.name | camel_case }} = new {{ field.type | to_java_type }}();
-        Iterator {{ field.name | camel_case }}Iter = raw{{ field.path | parse_json_path}}.iterator();
+        Iterator<{{ field.type | strip_list | to_java_type }}> {{ field.name | camel_case }}Iter = ((List<{{ field.type | strip_list | to_java_type }}>){{ field.path | parse_json_path}}).iterator();
         while ({{ field.name | camel_case }}Iter.hasNext()) {
-            this.{{ field.name | camel_case }}.add(new {{ field.type | strip_list | to_java_type }}({{ field.name | camel_case }}Iter.next()));
+            this.{{ field.name | camel_case }}.add(new {{ field.type | strip_list | to_java_type }}((Map<String, Object>){{ field.name | camel_case }}Iter.next()));
         }
         {%- else %}
         this.{{ field.name | camel_case }} = {{ field.path | parse_json_path | create_json_conversion(field.type)}};
@@ -91,11 +92,15 @@ public class {{ object.name | camel_case_caps }} {
         XPath xPath =  XPathFactory.newInstance().newXPath();
         {% for field in object.fields -%}
         {% if field.type | is_list %}
-        NodeList items = (NodeList) xPath.evaluate("{{ field.path }}", raw, XPathConstants.NODESET);
+        NodeList {{ field.name | camel_case}}Items = (NodeList) xPath.evaluate("{{ field.path }}", raw, XPathConstants.NODESET);
         this.{{ field.name | camel_case }} = new {{ field.type | to_java_type }}();
-        for (int i = 0; i < items.getLength(); i++) {
-            Node aNode = items.get(i);
-            this.{{ field.name | camel_case }}.add(new {{ field.type | strip_list | to_java_type }}({{ field.name | camel_case }}Iter.next()));
+        for (int i = 0; i < {{ field.name | camel_case}}Items.getLength(); i++) {
+            Node aNode = {{ field.name | camel_case}}Items.get(i);
+            {%- if field.type | is_builtin %}
+            this.{{ field.name | camel_case }}.add({{ field.type | strip_list | convert_builtin}}(aNode.toString()));
+            {%- else %}
+            this.{{ field.name | camel_case }}.add(new {{ field.type | strip_list | to_java_type }}(aNode));
+            {% endif %}
         }
         {%- elif field.type | is_builtin %}
         this.{{ field.name | camel_case }} = xPath.evaluate("{{ field.path }}", raw, {{ field.type | create_xml_conversion }});
@@ -107,16 +112,20 @@ public class {{ object.name | camel_case_caps }} {
     public {{ object.name | camel_case_caps }}(TagNode raw) {
         {% for field in object.fields -%}
         {% if field.type | is_list %}
-        Object[] items = (NodeList) xPath.evaluate("{{ field.path }}", raw, XPathConstants.NODESET);
+        Object[] {{ field.name | camel_case}}Items = raw.evaluateXPath("{{ field.path }}");
         this.{{ field.name | camel_case }} = new {{ field.type | to_java_type }}();
-        for (int i = 0; i < items.getLength(); i++) {
-            Node aNode = items.get(i);
-            this.{{ field.name | camel_case }}.add(new {{ field.type | strip_list | to_java_type }}({{ field.name | camel_case }}Iter.next()));
+        for (int i = 0; i < {{ field.name | camel_case}}Items.length; i++) {
+            TagNode aNode = (TagNode){{ field.name | camel_case}}Items[i];
+            {%- if field.type | strip_list | is_builtin %}
+            this.{{ field.name | camel_case }}.add({{ field.type | strip_list | convert_builtin}}(aNode.toString()));
+            {%- else %}
+            this.{{ field.name | camel_case }}.add(new {{ field.type | strip_list | to_java_type }}(aNode));
+            {% endif %}
         }
         {%- elif field.type | is_builtin %}
-        this.{{ field.name | camel_case }} = xPath.evaluate("{{ field.path }}", raw, {{ field.type | create_xml_conversion }});
+        this.{{ field.name | camel_case }} = {{ ('raw.evaluateXPath("' + field.path + '")') | create_json_conversion(field.type) }};
         {%- else %}
-        this.{{ field.name | camel_case }} = new {{ field.type | camel_case_caps }}(xPath.evaluate("{{ field.path }}", raw, XPathConstants.NODE));
+        this.{{ field.name | camel_case }} = new {{ field.type | camel_case_caps }}((TagNode) raw.evaluateXPath("{{ field.path }}"));
         {%- endif %}
         {%- endfor %}
     {% endif %}

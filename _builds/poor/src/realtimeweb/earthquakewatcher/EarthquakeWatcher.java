@@ -11,6 +11,7 @@ import javax.xml.xpath.XPathFactory;
 import realtimeweb.earthquakewatcher.domain.*;
 import realtimeweb.stickyweb.StickyWeb;
 import realtimeweb.stickyweb.StickyWebRequest;
+import realtimeweb.stickyweb.exceptions.StickyWebException;
 import realtimeweb.stickyweb.exceptions.StickyWebDataSourceNotFoundException;
 import realtimeweb.stickyweb.exceptions.StickyWebDataSourceParseException;
 import realtimeweb.stickyweb.exceptions.StickyWebInternetException;
