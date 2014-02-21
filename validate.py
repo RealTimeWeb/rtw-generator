@@ -102,6 +102,7 @@ def validate_object(name, data, warning, error, location):
                         "description", 
                         "objects.{}.description".format(name),
                         data, str, not_found="There will be no documentation for {}!".format(name))
+        require_field(warning, error, "format", "{}.format".format(location), data, set(("json", "xml", "html", "csv", "text")))
         typecheck_field(warning, error, "comment", "{}.comment".format(location), data, str)
         if "fields" in data:
             validate_list("objects.{}.fields".format(name), "fields", data, validate_field, warning, error)

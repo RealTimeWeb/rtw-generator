@@ -5,8 +5,12 @@ import java.io.InputStream;
 import java.net.URISyntaxException;
 import java.util.HashMap;
 
+{% if "xml" in formats_required -%}
+import javax.xml.xpath.XPath;
+import javax.xml.xpath.XPathFactory;
+{%- endif %}
+
 import realtimeweb.{{ metadata.name | flat_case }}.domain.*;
-import realtimeweb.stickyweb.Pattern;
 import realtimeweb.stickyweb.StickyWeb;
 import realtimeweb.stickyweb.StickyWebRequest;
 import realtimeweb.stickyweb.exceptions.StickyWebDataSourceNotFoundException;
@@ -16,10 +20,19 @@ import realtimeweb.stickyweb.exceptions.StickyWebJsonResponseParseException;
 import realtimeweb.stickyweb.exceptions.StickyWebLoadDataSourceException;
 import realtimeweb.stickyweb.exceptions.StickyWebNotInCacheException;
 
+/**
+ * {{ metadata.description }}
+ */
 public class {{ metadata.name | camel_case_caps }} {
+    {% if metadata.comment %}
+    // {{ metadata.comment }}
+    {% endif -%}
 	private StickyWeb connection;
 	private boolean online;
 	
+    /**
+     * Create a new, online connection to the service
+     */
 	public {{ metadata.name | camel_case_caps }}() {
 		this.online = true;
 		try {
@@ -36,12 +49,23 @@ public class {{ metadata.name | camel_case_caps }} {
 		}
 	}
 	
+    /**
+     * Create a new, offline connection to the service.
+     * @param cache An InputStream that can serve data for the connection.
+     */
 	public {{ metadata.name | camel_case_caps }}(InputStream cache) throws StickyWebDataSourceNotFoundException, StickyWebDataSourceParseException, StickyWebLoadDataSourceException {
 		this.online = false;
 		this.connection = new StickyWeb(cache);
 	}
     
     {% for function in functions %}
+    /**
+     * {{ function.description }}
+    {% for input in (function.payload_inputs + function.url_inputs) | rejectattr("hidden") %}
+     * @param cache {{ input.description }}
+    {%- endfor %}
+     * @return a {{ function.output }}
+     */
 	public {{ function.output | to_java_type }} {{ function.name | camel_case }}(
     {%- for input in (function.payload_inputs + function.url_inputs) | rejectattr("hidden") -%}
         {{ input.type | to_java_type }} {{input.name | camel_case }}
@@ -52,22 +76,54 @@ public class {{ metadata.name | camel_case_caps }} {
     ) {
 		final String url = String.format("{{ function.url | convert_url_parameters }}"
         {%- for parameter in function.url_inputs -%}
+        {%- if parameter.hidden -%}
+            , "{{ parameter.default }}"
+        {%- else -%}
             , String.valueOf({{ parameter.name }})
+        {%- endif -%}
         {%- endfor -%}
         );
 		HashMap<String, String> parameters = new HashMap<String, String>();
         {% for parameter in function.payload_inputs %}
-        parameters.put({{ parameter.name }}, String.valueOf({{ parameter.path }}));
-        {% endfor %}
-		parameters.put("lat", String.valueOf(latitude));
-		parameters.put("lon", String.valueOf(longitude));
-		parameters.put("FcstType", String.valueOf("json"));
-		
+        {%- if parameter.hidden -%}
+        parameters.put("{{ parameter.path }}", "{{ parameter.default }}");
+        {%- else -%}
+        parameters.put("{{ parameter.path }}", String.valueOf({{ parameter.name }}));
+        {%- endif -%}
+        {% endfor -%}
+
 		try {
-			StickyWebRequest request = connection.get(url, parameters)
-					.setOnline(online)
-					.setPattern(Pattern.EMPTY);
-			return new Report(request.execute().asJSON());
+			StickyWebRequest request = connection.get(url, parameters).setOnline(online);
+            {% if function.format == "xml" -%}
+                {%- if function.post == "" -%}
+            return new {{ function.output | to_java_type }}(request.execute().asXML());
+                {%- else -%}
+            XPath xPath =  XPathFactory.newInstance().newXPath();
+            return new {{ function.output | to_java_type }}(xPath.compile("{{ function.post }}").evaluate(request.execute().asXML()));
+                {%- endif -%}
+            {%- elif function.format == "html" -%}
+                {%- if function.post == "" -%}
+            return new {{ function.output | to_java_type }}(request.execute().asHTML());
+                {%- else -%}
+            // TODO: Probably want to cast to (org.htmlcleaner.TagNode) and manipulate data
+            return new {{ function.output | to_java_type }}(request.execute().asHTML().evaluateXPath("{{ function.post }}"));
+                {%- endif -%}
+            {%- elif function.format == "json" -%}
+            // TODO: Might need to cast some intermediary steps
+            {% if function.post == "" -%}
+            return new {{ function.output | to_java_type }}(request.execute().asJSON());
+            {%- else -%}
+            return new {{ function.output | to_java_type }}(request.execute().asJSON(){{ function.post | parse_json_path }});
+                {%- endif -%}
+            {%- elif function.format == "text" -%}
+                return new {{ function.output | to_java_type }}(request.execute().asText());
+            {%- elif function.format == "csv" -%}
+                {%- if function.post == "" -%}
+            return new {{ function.output | to_java_type }}(request.execute().asCSV());
+                {%- else -%}
+            return new {{ function.output | to_java_type }}(request.execute().asCSV().get({{ function.post }}));
+                {%- endif -%}
+            {%- endif %}
 		} catch (IllegalStateException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -83,11 +139,5 @@ public class {{ metadata.name | camel_case_caps }} {
 		}
 		return null;
 	}
-    
     {% endfor %}
-	
-	public static void main(String args[]) {
-		Weather weather = new Weather();
-		Report saved = weather.getWeather(37, -80);
-	}
 }

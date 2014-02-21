@@ -48,8 +48,11 @@ def compile_object(name, data):
     obj.name = name
     obj.description = data.get("description", "")
     obj.comment = data.get("comment", "")
+    obj.format = data.get("format", "text")
     obj.fields = [compile_field(*data) for data in data["fields"].iteritems()]
-    obj.dependencies = set([flatten_list(field.name) for field in obj.fields if flatten_list(obj.name) != flatten_list(field.name)])
+    obj.dependencies = set([flatten_list(field.type)
+                                for field in obj.fields 
+                                    if flatten_list(obj.name) != flatten_list(field.type)])
     return obj
     
 def compile_input(name, data):
@@ -74,6 +77,7 @@ def compile_function(name, data):
     function.output = data["output"]
     function.description = data.get("description", "")
     function.comment = data.get("comment", "")
+    function.post = data.get("post", "")
     function.authentication = data.get("authentication", None)
     if "inputs" in data:
         inputs = [compile_input(*data) for data in data["inputs"].iteritems()]
@@ -91,6 +95,7 @@ def compile_spec(spec):
     package.enums = [compile_enum(*data) for data in spec["enums"].iteritems()]
     package.objects = [compile_object(*data) for data in spec["objects"].iteritems()]
     package.functions = [compile_function(*data) for data in spec["functions"].iteritems()]
+    package.formats_required = set(function.format for function in package.functions)
     #package.dependencies = chain(*[function.dependencies for function in package.functions],
     #                             *[obj.dependencies for obj in package.objects])
     return package

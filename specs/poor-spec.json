@@ -12,18 +12,21 @@
 	"objects": {
         "My authors": {
             "description": "A list of authors.",
+            "format": "xml",
             "fields": {
                 "books": {"type": "string[]", "path": "/bookstore/book/author", "description": "All the authors."},
-                "years": {"type": "int[]", "path": "/bookstore/book/year", "description": "All the years."}
+                "years": {"type": "integer[]", "path": "/bookstore/book/year", "description": "All the years."}
                 }},
 		"Report": {
             "description": "Information about earthquakes matching certain criteria, including the area that they occurred.",
+            "format": "json",
             "fields": {
                 "area": {"type": "bounding box", "path": "bbox", "description": "A region that contains all the earthquakes."},
                 "earthquakes": { "type": "Earthquake[]", "path": "features", "description": "A list of the earthquakes."},
                 "title": {"type": "string", "path": "metadata.title", "description": "A human-readable title that describes this data."}}},
         "Earthquake": {
             "description": "Information about a specific earthquake.",
+            "format": "json",
             "fields": {
                 "location": {"type": "coordinate", "path": "geometry.coordinates", "description": "The location of the earthquake."},
                 "magnitude": {"type": "float", "hint": {"min": 0, "max": 10}, "path": "properties.mag", "description": "The magnitude of the earthquake on the Richter Scale."},
@@ -42,20 +45,22 @@
                 "gap": {"type": "float", "path": "properties.gap", "description": "The largest azimuthal gap between azimuthally adjacent stations (in degrees), or null if the data is not available. In general, the smaller this number, the more reliable is the calculated horizontal position of the earthquake."}}},
         "Coordinate": { 
             "description": "The longitudinal, latitudinal, and depth where the earthquake occurred.","comment": "For some unclear reason, these are stored as a list instead of a dictionary.",
+            "format": "json",
             "fields": {
-                "longitude": {"type": "float", "hint": "longitude", "path": "0", "description": "The longitude (West-North) component."},
-                "latitude": {"type": "float", "hint": "latitude", "path": "1", "description": "The latitude (South-North) component."},
-                "depth": {"type": "float", "path": "2", "description": "The depth (closer or farther from the surface) component."}}},
+                "longitude": {"type": "float", "hint": "longitude", "path": "[0]", "description": "The longitude (West-North) component."},
+                "latitude": {"type": "float", "hint": "latitude", "path": "[1]", "description": "The latitude (South-North) component."},
+                "depth": {"type": "float", "path": "[2]", "description": "The depth (closer or farther from the surface) component."}}},
         "Bounding Box": {
             "description": "The longitudinal, latitudinal, and depth of the region required to display all the earthquakes.",
             "comment": "For some unclear reason, these are stored as a list instead of a dictionary.",
+            "format": "json",
             "fields": {
-                "minimum longitude": { "type": "float", "hint": "longitude", "path": "0", "description": "The lower longitude (West) component."},
-                "minimum latitude": { "type": "float", "hint": "latitude", "path": "1", "description": "The lower latitude (South) component."},
-                "minimum depth": { "type": "float", "path": "2", "description": "The lower depth (closer or farther from the surface) component."},
-                "maximum longitude": { "type": "float", "hint": "longitude", "path": "0", "description": "The higher longitude (East) component."},
-                "maximum latitude": { "type": "float", "hint": "latitude", "path": "1", "description": "The higher latitude (North) component."},
-                "maximum depth": {"type": "float", "path": "2", "description": "The higher depth (closer or farther from the surface) component."}}}
+                "minimum longitude": { "type": "float", "hint": "longitude", "path": "[0]", "description": "The lower longitude (West) component."},
+                "minimum latitude": { "type": "float", "hint": "latitude", "path": "[1]", "description": "The lower latitude (South) component."},
+                "minimum depth": { "type": "float", "path": "[2]", "description": "The lower depth (closer or farther from the surface) component."},
+                "maximum longitude": { "type": "float", "hint": "longitude", "path": "[0]", "description": "The higher longitude (East) component."},
+                "maximum latitude": { "type": "float", "hint": "latitude", "path": "[1]", "description": "The higher latitude (North) component."},
+                "maximum depth": {"type": "float", "path": "[2]", "description": "The higher depth (closer or farther from the surface) component."}}}
 	},
 	"functions": {
         "Get Some Books": {
@@ -63,12 +68,22 @@
             "verb": "post",
             "format": "xml",
             "description": "Connects without any parameters",
+            "post": "/book/",
             "output": "My authors"
+            },
+        "get first year": {
+            "url": "http://www.w3schools.com/dom/books.xml",
+            "verb": "get",
+            "format": "xml",
+            "description": "Gets the first books",
+            "post": "/bookstore/book[0]/year",
+            "output": "integer"
             },
         "Get Earthquakes": {
             "url": "http://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/<time>_<threshold>.geojson",
             "verb": "get",
             "format": "json",
+            "post": "book.test[3].children.data",
             "description": "Retrieves information about earthquakes around the world.",
             "comment": "Should really make these enums",
             "output": "Report",
@@ -83,7 +98,7 @@
                     "path": "my_secret",
                     "type": "Report",
                     "description": "Does some magic.",
-                    "default": 101,
+                    "default": "aaesfdiosjdfojkdfjl",
                     "hidden": true,
                     "indexable": false
                     },
