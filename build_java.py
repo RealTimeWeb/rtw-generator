@@ -90,15 +90,17 @@ def is_list(type):
 def strip_list(type):
     return type[:-2]
 
-def create_json_conversion(data, type):
+def create_json_conversion(data, type, is_map=True):
     if is_list(type):
         type = strip_list(type)
     if type in json_conversion:
         return "{}({}.toString())".format(json_conversion[type], data)
     elif type == "string":
         return "{}.toString()".format(data)
-    else:
+    elif is_map:
         return "new {}((Map<String, Object>){})".format(camel_case_caps(type), data)
+    else:
+        return "new {}((List<Object>){})".format(camel_case_caps(type), data)
 
 def convert_builtin(type):
     if type == "string":
@@ -136,21 +138,21 @@ env.filters['create_xml_conversion'] = create_xml_conversion
 env.filters['convert_builtin'] = convert_builtin
 
 def build_metafiles(model):
-    return {'.classpath': env.get_template('.classpath',globals=model).render(),
-            '.project': env.get_template('.project',globals=model).render(),
-            'build.xml': env.get_template('build.xml', globals=model).render()}
+    return {'java/.classpath': env.get_template('.classpath',globals=model).render(),
+            'java/.project': env.get_template('.project',globals=model).render(),
+            'java/build.xml': env.get_template('build.xml', globals=model).render()}
     
 def build_main(model):
     name = model['metadata']['name']
-    root = 'src/realtimeweb/' + flat_case(name) + '/'
+    root = 'java/src/realtimeweb/' + flat_case(name) + '/'
     return {root + camel_case_caps(name) + '.java' :
                 env.get_template('main.java', globals=model).render()}
 
 def build_classes(model):
     name = model['metadata']['name']
-    root = 'src/realtimeweb/' + flat_case(name) + '/domain/'
+    root = 'java/src/realtimeweb/' + flat_case(name) + '/domain/'
     files = {}
-    template = env.get_template('domain.java', globals={'metadata': model['metadata']})
+    template = env.get_template('domain.java', globals={'object_is_map' : model["object_is_map"], 'metadata': model['metadata']})
     for object in model['objects']:
         filename = root + camel_case_caps(object['name']) + '.java'
         files[filename] = template.render(object=object)
@@ -161,7 +163,7 @@ def copy_file(filename):
         return input.read()
 
 def build_java(model):
-    files = {'libs/StickyWeb.jar' : copy_file(templates+'libs/StickyWeb.jar')}
+    files = {'java/libs/StickyWeb.jar' : copy_file(templates+'libs/StickyWeb.jar')}
     files.update(build_metafiles(model))
     files.update(build_main(model))
     files.update(build_classes(model))

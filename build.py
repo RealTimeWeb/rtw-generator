@@ -41,4 +41,4 @@ def build_dir(files, prepend):
     with open(error_filename, "w+") as error:
         if error_log:        
             error.write("\n\n".join(error_log))
-    return len(error_log), error_log
+    return "Completed", error_log

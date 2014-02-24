@@ -1,3 +1,7 @@
+def copy_file(filename):
+    with open(filename, 'rb') as input:
+        return input.read()
+
 def clean_json(input):
     if isinstance(input, dict):
         return {clean_json(key): clean_json(value) for key, value in input.iteritems()}

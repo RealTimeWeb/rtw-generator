@@ -105,7 +105,10 @@ def validate_object(name, data, warning, error, location):
         require_field(warning, error, "format", "{}.format".format(location), data, set(("json", "xml", "html", "csv", "text")))
         typecheck_field(warning, error, "comment", "{}.comment".format(location), data, str)
         if "fields" in data:
-            validate_list("objects.{}.fields".format(name), "fields", data, validate_field, warning, error)
+            if data["fields"]:
+                validate_list("objects.{}.fields".format(name), "fields", data, validate_field, warning, error)
+            else:
+                error("Expected at least one field for objects.{}.fields".format(name))
         else: 
             error(keyword_not_found("objects.{}.fields".format(name)))
     else:

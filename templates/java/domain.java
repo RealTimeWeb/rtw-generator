@@ -75,16 +75,26 @@ public class {{ object.name | camel_case_caps }} {
 	 * @return 
 	 */
     {% if object.format == "json" %}
+    {% if object.fields[0].path.startswith("[") %}
+    public {{ object.name | camel_case_caps }}(List<Object> raw) {
+    {% else %}
     public {{ object.name | camel_case_caps }}(Map<String, Object> raw) {
+    {% endif %}
         {% for field in object.fields -%}
         {% if field.type | is_list %}
         this.{{ field.name | camel_case }} = new {{ field.type | to_java_type }}();
-        Iterator<{{ field.type | strip_list | to_java_type }}> {{ field.name | camel_case }}Iter = ((List<{{ field.type | strip_list | to_java_type }}>){{ field.path | parse_json_path}}).iterator();
+        Iterator<Object> {{ field.name | camel_case }}Iter = ((List<Object>){{ field.path | parse_json_path}}).iterator();
         while ({{ field.name | camel_case }}Iter.hasNext()) {
-            this.{{ field.name | camel_case }}.add(new {{ field.type | strip_list | to_java_type }}((Map<String, Object>){{ field.name | camel_case }}Iter.next()));
+            this.{{ field.name | camel_case }}.add(new {{ field.type | strip_list | to_java_type }}((
+            {%- if object_is_map[field.type | strip_list] -%}
+            Map<String, Object>
+            {%- else -%}
+            List<Object>
+            {%- endif -%}
+            ){{ field.name | camel_case }}Iter.next()));
         }
         {%- else %}
-        this.{{ field.name | camel_case }} = {{ field.path | parse_json_path | create_json_conversion(field.type)}};
+        this.{{ field.name | camel_case }} = {{ field.path | parse_json_path | create_json_conversion(field.type, object_is_map[field.name])}};
         {%- endif %}
         {%- endfor %}
     {% elif object.format == "xml" %}

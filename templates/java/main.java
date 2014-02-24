@@ -72,7 +72,7 @@ public class {{ metadata.name | camel_case_caps }} {
      * @return a {{ function.output }}
      */
 	public {{ function.output | to_java_type }} {{ function.name | camel_case }}(
-    {%- for input in (function.payload_inputs + function.url_inputs) | rejectattr("hidden") -%}
+    {%- for input in function.visible_inputs -%}
         {{ input.type | to_java_type }} {{input.name | camel_case }}
         {%- if not loop.last -%}
         , 
@@ -89,16 +89,22 @@ public class {{ metadata.name | camel_case_caps }} {
         {%- endfor -%}
         );
 		HashMap<String, String> parameters = new HashMap<String, String>();
-        {% for parameter in function.payload_inputs %}
+        {% for parameter in function.payload_inputs -%}
         {%- if parameter.hidden -%}
         parameters.put("{{ parameter.path }}", "{{ parameter.default }}");
         {%- else -%}
         parameters.put("{{ parameter.path }}", String.valueOf({{ parameter.name }}));
         {%- endif -%}
-        {% endfor -%}
-
+        {% endfor %}
+        ArrayList indexList = new ArrayList<String>();
+        {% for parameter in function.payload_inputs if parameter.indexed -%}
+        indexList.add("{{ parameter.path }}");
+        {%- endif -%}
+        {% endfor %}
 		try {
-			StickyWebRequest request = connection.get(url, parameters).setOnline(online);
+			StickyWebRequest request = connection.{{ function.format }}(url, parameters)
+                        .setOnline(online)
+                        .setIndices(indexList);
             {% if function.format == "xml" -%}
                 {%- if function.post == "" -%}
             return new {{ function.output | to_java_type }}(request.execute().asXML());

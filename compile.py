@@ -39,6 +39,10 @@ def compile_field(name, data):
     field.name = name
     field.type = data["type"]
     field.path = data["path"]
+    if "order" in data:
+        field.order = data["order"]
+    else:
+        field.order = None
     field.description = data.get("description", "")
     field.comment = data.get("comment", "")
     return field
@@ -50,6 +54,13 @@ def compile_object(name, data):
     obj.comment = data.get("comment", "")
     obj.format = data.get("format", "text")
     obj.fields = [compile_field(*data) for data in data["fields"].iteritems()]
+    # We arbitrarily assume no one tries to make 1000 fields
+    obj.fields.sort(key=lambda field : field.order if field.order is not None else 1000)
+    if obj.fields:
+        # Technically should be an error to have a class with no fields
+        obj.is_map = not bool(obj.fields[0].path.startswith("["))
+    else:
+        obj.is_map = True
     obj.dependencies = set([flatten_list(field.type)
                                 for field in obj.fields 
                                     if flatten_list(obj.name) != flatten_list(field.type)])
@@ -65,6 +76,10 @@ def compile_input(name, data):
     input.indexed = data.get("indexed", True)
     input.hidden = data.get("hidden", False)
     input.default = data.get("default", None)
+    if "order" in data:
+        input.order = data["order"]
+    else:
+        input.order = None
     return input
     
 def compile_function(name, data):
@@ -83,7 +98,10 @@ def compile_function(name, data):
         inputs = [compile_input(*data) for data in data["inputs"].iteritems()]
     else:
         inputs = []
+    inputs.sort(key=lambda input : input.order if input.order is not None else 1000)
     # Ensure the url arguments are in the proper order - None indicates missing argument!
+    function.visible_inputs = [input for input in inputs if not input.hidden]
+    function.indexed_inputs = [input for input in inputs if input.indexed]
     function.url_inputs = [next((i for i in inputs if i.path == input), None) for input in url_input_names]
     function.payload_inputs = [input for input in inputs if input.path not in url_input_names]
     function.dependencies = set([flatten_list(input.type) for input in inputs] + [flatten_list(function.output)])
@@ -102,6 +120,7 @@ def compile_spec(spec):
         package.objects = []
     package.functions = [compile_function(*data) for data in spec["functions"].iteritems()]
     package.formats_required = set(function.format for function in package.functions)
+    package.object_is_map = {obj.name : obj.is_map for obj in package.objects}
     #package.dependencies = chain(*[function.dependencies for function in package.functions],
     #                             *[obj.dependencies for obj in package.objects])
     return package

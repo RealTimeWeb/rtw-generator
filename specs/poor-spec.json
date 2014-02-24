@@ -49,20 +49,20 @@
             "description": "The longitudinal, latitudinal, and depth where the earthquake occurred.","comment": "For some unclear reason, these are stored as a list instead of a dictionary.",
             "format": "json",
             "fields": {
-                "longitude": {"type": "float", "hint": "longitude", "path": "[0]", "description": "The longitude (West-North) component."},
-                "latitude": {"type": "float", "hint": "latitude", "path": "[1]", "description": "The latitude (South-North) component."},
-                "depth": {"type": "float", "path": "[2]", "description": "The depth (closer or farther from the surface) component."}}},
+                "longitude": {"type": "float", "hint": "longitude", "path": "[0]", "description": "The longitude (West-North) component.", "order": 0},
+                "latitude": {"type": "float", "hint": "latitude", "path": "[1]", "description": "The latitude (South-North) component.", "order": 1},
+                "depth": {"type": "float", "path": "[2]", "description": "The depth (closer or farther from the surface) component.", "order": 2}}},
         "Bounding Box": {
             "description": "The longitudinal, latitudinal, and depth of the region required to display all the earthquakes.",
             "comment": "For some unclear reason, these are stored as a list instead of a dictionary.",
             "format": "json",
             "fields": {
-                "minimum longitude": { "type": "float", "hint": "longitude", "path": "[0]", "description": "The lower longitude (West) component."},
-                "minimum latitude": { "type": "float", "hint": "latitude", "path": "[1]", "description": "The lower latitude (South) component."},
-                "minimum depth": { "type": "float", "path": "[2]", "description": "The lower depth (closer or farther from the surface) component."},
-                "maximum longitude": { "type": "float", "hint": "longitude", "path": "[0]", "description": "The higher longitude (East) component."},
-                "maximum latitude": { "type": "float", "hint": "latitude", "path": "[1]", "description": "The higher latitude (North) component."},
-                "maximum depth": {"type": "float", "path": "[2]", "description": "The higher depth (closer or farther from the surface) component."}}}
+                "minimum longitude": { "type": "float", "hint": "longitude", "path": "[0]", "description": "The lower longitude (West) component.", "order": 0},
+                "minimum latitude": { "type": "float", "hint": "latitude", "path": "[1]", "description": "The lower latitude (South) component.", "order": 1},
+                "minimum depth": { "type": "float", "path": "[2]", "description": "The lower depth (closer or farther from the surface) component.", "order": 2},
+                "maximum longitude": { "type": "float", "hint": "longitude", "path": "[3]", "description": "The higher longitude (East) component.", "order": 3},
+                "maximum latitude": { "type": "float", "hint": "latitude", "path": "[4]", "description": "The higher latitude (North) component.", "order": 4},
+                "maximum depth": {"type": "float", "path": "[5]", "description": "The higher depth (closer or farther from the surface) component.", "order": 5}}}
 	},
 	"functions": {
         "Get Some Books": {
@@ -92,7 +92,7 @@
             "inputs": {
                 "threshold": {
                     "path": "threshold",
-                    "type": "string",
+                    "type": "integer",
                     "description": "A string indicating what kind of earthquakes to report. Must be either \"significant\" (only significant earthquakes), \"all\" (all earthquakes, regardless of significance), \"4.5\", \"2.5\", or \"1.0\". Note that for the last three, all earthquakes at and above that level will be reported.",
                     "default": 5,
                     "indexable": true},
