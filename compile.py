@@ -52,7 +52,7 @@ def compile_object(name, data):
     obj.name = name
     obj.description = data.get("description", "")
     obj.comment = data.get("comment", "")
-    obj.format = data.get("format", "text")
+    obj.format = data.get("format", "json")
     obj.fields = [compile_field(*data) for data in data["fields"].iteritems()]
     # We arbitrarily assume no one tries to make 1000 fields
     obj.fields.sort(key=lambda field : field.order if field.order is not None else 1000)
@@ -88,7 +88,7 @@ def compile_function(name, data):
     function.url = data["url"]
     url_input_names = map(str, re.findall("<(.*?)>", function.url))
     function.verb = data["verb"]
-    function.format = data["format"]
+    function.format = data.get("format", "json")
     function.output = data["output"]
     function.description = data.get("description", "")
     function.comment = data.get("comment", "")

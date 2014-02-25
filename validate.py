@@ -97,12 +97,13 @@ def validate_field(name, data, warning, error, location):
         error(type_error(location, dict, type(data)))
     
 def validate_object(name, data, warning, error, location):
+    location = "{}.{}".format(location, name)
     if isinstance(data, dict):
         recommend_field(warning, error, 
                         "description", 
                         "objects.{}.description".format(name),
                         data, str, not_found="There will be no documentation for {}!".format(name))
-        require_field(warning, error, "format", "{}.format".format(location), data, set(("json", "xml", "html", "csv", "text")))
+        recommend_field(warning, error, "format", "{}.format".format(location), data, set(("json", "xml", "html", "csv", "text")), not_found="Assuming json.")
         typecheck_field(warning, error, "comment", "{}.comment".format(location), data, str)
         if "fields" in data:
             if data["fields"]:
@@ -141,7 +142,7 @@ def validate_function(name, data, warning, error, location):
     if isinstance(data, dict):
         require_field(warning, error, "url", "{}.url".format(location), data, str)
         require_field(warning, error, "verb", "{}.verb".format(location), data, set(("get", "post", "delete", "put")))
-        require_field(warning, error, "format", "{}.format".format(location), data, set(("json", "xml", "html", "csv", "text")))
+        recommend_field(warning, error, "format", "{}.format".format(location), data, set(("json", "xml", "html", "csv", "text")), not_found="Assuming json.")
         require_field(warning, error, "output", "{}.output".format(location), data, str)
         #recommend_field(warning, error, "loop", "{}.loop".format(location), 
         #                data, set(("repeat", "restart", "empty")),
