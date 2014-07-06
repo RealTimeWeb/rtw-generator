@@ -3,6 +3,7 @@ package realtimeweb.earthquakewatcher.domain;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -81,16 +82,24 @@ public class Report {
 	 * @param map The raw json data that will be parsed.
 	 * @return 
 	 */
-    
     public Report(Map<String, Object> raw) {
-        
-        this.area = new BoundingBox(raw.get("bbox"));
-        this.earthquakes = new ArrayList<Earthquake>();
-        Iterator earthquakesIter = raw.get("features").iterator();
-        while (earthquakesIter.hasNext()) {
-            this.earthquakes.add(new Earthquake(earthquakesIter.next()));
+        // TODO: Check that the data has the correct schema.
+        // NOTE: It's much safer to check the Map for fields than to catch a runtime exception.
+        try {
+            this.area = new BoundingBox((List<Object>)raw.get("bbox"));
+            this.earthquakes = new ArrayList<Earthquake>();
+            Iterator<Object> earthquakesIter = ((List<Object>)raw.get("features")).iterator();
+            while (earthquakesIter.hasNext()) {
+                this.earthquakes.add(new Earthquake((Map<String, Object>)earthquakesIter.next()));
+            }
+            this.title = ((Map<String, Object>) raw.get("metadata")).get("title").toString();
+        } catch (NullPointerException e) {
+    		System.err.println("Could not convert the response to a Report; a field was missing.");
+    		e.printStackTrace();
+    	} catch (ClassCastException e) {
+    		System.err.println("Could not convert the response to a Report; a field had the wrong structure.");
+    		e.printStackTrace();
         }
-        this.title = ((Map<String, Object>) raw.get("metadata")).get("title").toString();
     
 	}	
 }

@@ -142,37 +142,37 @@
             "fields": {
                 "minimum longitude": {
                     "type": "float",
-                    "path": "0",
+                    "path": "[0]",
                     "description": "The lower longitude (West) component.",
                     "order": 0
                 },
                 "minimum latitude": {
                     "type": "float",
-                    "path": "1",
+                    "path": "[1]",
                     "description": "The lower latitude (South) component.",
                     "order": 1
                 },
                 "minimum depth": {
                     "type": "float",
-                    "path": "2",
+                    "path": "[2]",
                     "description": "The lower depth (closer or farther from the surface) component.",
                     "order": 2
                 },
                 "maximum longitude": {
                     "type": "float",
-                    "path": "0",
+                    "path": "[3]",
                     "description": "The higher longitude (East) component.",
                     "order": 3
                 },
                 "maximum latitude": {
                     "type": "float",
-                    "path": "1",
+                    "path": "[4]",
                     "description": "The higher latitude (North) component.",
                     "order": 4
                 },
                 "maximum depth": {
                     "type": "float",
-                    "path": "2",
+                    "path": "[5]",
                     "description": "The higher depth (closer or farther from the surface) component.",
                     "order": 5
                 }

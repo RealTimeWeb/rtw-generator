@@ -15,11 +15,11 @@ def build_zip(files):
     error_log = []
     try:
         for filename, data in files.iteritems():
-            zipFile.writestr(filename, data)
+            zipFile.writestr(filename.encode('utf-8'), data.encode('utf8'))
     except Exception, e:
-        error_log.append(traceback.format_exc())
+        error_log.append(traceback.format_exc().encode('utf-8'))
     if error_log:
-        zipFile.writestr("error_log", error_log)
+        zipFile.writestr("error_log".encode('utf-8'), error_log)
     zipFile.close()
     inMemoryOutputFile.seek(0)
     data = inMemoryOutputFile.read()

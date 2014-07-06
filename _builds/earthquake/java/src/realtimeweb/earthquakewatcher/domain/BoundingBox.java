@@ -3,6 +3,7 @@ package realtimeweb.earthquakewatcher.domain;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -16,27 +17,27 @@ public class BoundingBox {
 	
     // For some unclear reason, these are stored as a list instead of a dictionary.
     
-    private Double maximumLongitude;
+    private Double minimumLongitude;
     private Double minimumLatitude;
     private Double minimumDepth;
-    private Double minimumLongitude;
-    private Double maximumDepth;
+    private Double maximumLongitude;
     private Double maximumLatitude;
+    private Double maximumDepth;
     
     
     /*
-     * @return The higher longitude (East) component.
+     * @return The lower longitude (West) component.
      */
-    public Double getMaximumLongitude() {
-        return this.maximumLongitude;
+    public Double getMinimumLongitude() {
+        return this.minimumLongitude;
     }
     
     /*
-     * @param The higher longitude (East) component.
+     * @param The lower longitude (West) component.
      * @return Double
      */
-    public void setMaximumLongitude(Double maximumLongitude) {
-        this.maximumLongitude = maximumLongitude;
+    public void setMinimumLongitude(Double minimumLongitude) {
+        this.minimumLongitude = minimumLongitude;
     }
     
     /*
@@ -70,33 +71,18 @@ public class BoundingBox {
     }
     
     /*
-     * @return The lower longitude (West) component.
+     * @return The higher longitude (East) component.
      */
-    public Double getMinimumLongitude() {
-        return this.minimumLongitude;
+    public Double getMaximumLongitude() {
+        return this.maximumLongitude;
     }
     
     /*
-     * @param The lower longitude (West) component.
+     * @param The higher longitude (East) component.
      * @return Double
      */
-    public void setMinimumLongitude(Double minimumLongitude) {
-        this.minimumLongitude = minimumLongitude;
-    }
-    
-    /*
-     * @return The higher depth (closer or farther from the surface) component.
-     */
-    public Double getMaximumDepth() {
-        return this.maximumDepth;
-    }
-    
-    /*
-     * @param The higher depth (closer or farther from the surface) component.
-     * @return Double
-     */
-    public void setMaximumDepth(Double maximumDepth) {
-        this.maximumDepth = maximumDepth;
+    public void setMaximumLongitude(Double maximumLongitude) {
+        this.maximumLongitude = maximumLongitude;
     }
     
     /*
@@ -114,6 +100,21 @@ public class BoundingBox {
         this.maximumLatitude = maximumLatitude;
     }
     
+    /*
+     * @return The higher depth (closer or farther from the surface) component.
+     */
+    public Double getMaximumDepth() {
+        return this.maximumDepth;
+    }
+    
+    /*
+     * @param The higher depth (closer or farther from the surface) component.
+     * @return Double
+     */
+    public void setMaximumDepth(Double maximumDepth) {
+        this.maximumDepth = maximumDepth;
+    }
+    
 	
 	/**
 	 * Creates a string based representation of this BoundingBox.
@@ -121,7 +122,7 @@ public class BoundingBox {
 	 * @return String
 	 */
 	public String toString() {
-		return "Report[" +maximumLongitude+", "+minimumLatitude+", "+minimumDepth+", "+minimumLongitude+", "+maximumDepth+", "+maximumLatitude+"]";
+		return "Report[" +minimumLongitude+", "+minimumLatitude+", "+minimumDepth+", "+maximumLongitude+", "+maximumLatitude+", "+maximumDepth+"]";
 	}
 	
 	/**
@@ -129,15 +130,23 @@ public class BoundingBox {
 	 * @param map The raw json data that will be parsed.
 	 * @return 
 	 */
-    
-    public BoundingBox(Map<String, Object> raw) {
-        
-        this.maximumLongitude = Double.parseDouble(raw.get(0).toString());
-        this.minimumLatitude = Double.parseDouble(raw.get(1).toString());
-        this.minimumDepth = Double.parseDouble(raw.get(2).toString());
-        this.minimumLongitude = Double.parseDouble(raw.get(0).toString());
-        this.maximumDepth = Double.parseDouble(raw.get(2).toString());
-        this.maximumLatitude = Double.parseDouble(raw.get(1).toString());
+    public BoundingBox(List<Object> raw) {
+        // TODO: Check that the data has the correct schema.
+        // NOTE: It's much safer to check the Map for fields than to catch a runtime exception.
+        try {
+            this.minimumLongitude = Double.parseDouble(raw.get(0).toString());
+            this.minimumLatitude = Double.parseDouble(raw.get(1).toString());
+            this.minimumDepth = Double.parseDouble(raw.get(2).toString());
+            this.maximumLongitude = Double.parseDouble(raw.get(3).toString());
+            this.maximumLatitude = Double.parseDouble(raw.get(4).toString());
+            this.maximumDepth = Double.parseDouble(raw.get(5).toString());
+        } catch (NullPointerException e) {
+    		System.err.println("Could not convert the response to a BoundingBox; a field was missing.");
+    		e.printStackTrace();
+    	} catch (ClassCastException e) {
+    		System.err.println("Could not convert the response to a BoundingBox; a field had the wrong structure.");
+    		e.printStackTrace();
+        }
     
 	}	
 }

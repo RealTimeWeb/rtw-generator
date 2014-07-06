@@ -3,6 +3,7 @@ package realtimeweb.earthquakewatcher.domain;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -272,23 +273,32 @@ public class Earthquake {
 	 * @param map The raw json data that will be parsed.
 	 * @return 
 	 */
-    
     public Earthquake(Map<String, Object> raw) {
-        this.maximumEstimatedIntensity = Double.parseDouble(((Map<String, Object>) raw.get("properties")).get("mmi").toString());
-        this.distance = Double.parseDouble(((Map<String, Object>) raw.get("properties")).get("dmin").toString());
-        this.alertLevel = ((Map<String, Object>) raw.get("properties")).get("alert").toString();
-        this.feltReports = Integer.parseInt(((Map<String, Object>) raw.get("properties")).get("felt").toString());
-        this.locationDescription = ((Map<String, Object>) raw.get("properties")).get("place").toString();
-        this.url = ((Map<String, Object>) raw.get("properties")).get("url").toString();
-        this.time = Long.parseLong(((Map<String, Object>) raw.get("properties")).get("time").toString());
-        this.rootMeanSquare = Double.parseDouble(((Map<String, Object>) raw.get("properties")).get("rms").toString());
-        this.eventSource = ((Map<String, Object>) raw.get("properties")).get("status").toString();
-        this.gap = Double.parseDouble(((Map<String, Object>) raw.get("properties")).get("gap").toString());
-        this.magnitude = Double.parseDouble(((Map<String, Object>) raw.get("properties")).get("mag").toString());
-        this.location = new Coordinate((List<Object>) ((Map<String, Object>) raw.get("geometry")).get("coordinates"));
-        this.significance = Integer.parseInt(((Map<String, Object>) raw.get("properties")).get("sig").toString());
-        this.maximumReportedIntensity = Double.parseDouble(((Map<String, Object>) raw.get("properties")).get("cdi").toString());
-        this.id = raw.get("id").toString();
+        // TODO: Check that the data has the correct schema.
+        // NOTE: It's much safer to check the Map for fields than to catch a runtime exception.
+        try {
+            this.maximumEstimatedIntensity = Double.parseDouble(((Map<String, Object>) raw.get("properties")).get("mmi").toString());
+            this.distance = Double.parseDouble(((Map<String, Object>) raw.get("properties")).get("dmin").toString());
+            this.alertLevel = ((Map<String, Object>) raw.get("properties")).get("alert").toString();
+            this.feltReports = Integer.parseInt(((Map<String, Object>) raw.get("properties")).get("felt").toString());
+            this.locationDescription = ((Map<String, Object>) raw.get("properties")).get("place").toString();
+            this.url = ((Map<String, Object>) raw.get("properties")).get("url").toString();
+            this.time = Long.parseLong(((Map<String, Object>) raw.get("properties")).get("time").toString());
+            this.rootMeanSquare = Double.parseDouble(((Map<String, Object>) raw.get("properties")).get("rms").toString());
+            this.eventSource = ((Map<String, Object>) raw.get("properties")).get("status").toString();
+            this.gap = Double.parseDouble(((Map<String, Object>) raw.get("properties")).get("gap").toString());
+            this.magnitude = Double.parseDouble(((Map<String, Object>) raw.get("properties")).get("mag").toString());
+            this.location = new Coordinate((List<Object>)((Map<String, Object>) raw.get("geometry")).get("coordinates"));
+            this.significance = Integer.parseInt(((Map<String, Object>) raw.get("properties")).get("sig").toString());
+            this.maximumReportedIntensity = Double.parseDouble(((Map<String, Object>) raw.get("properties")).get("cdi").toString());
+            this.id = raw.get("id").toString();
+        } catch (NullPointerException e) {
+    		System.err.println("Could not convert the response to a Earthquake; a field was missing.");
+    		e.printStackTrace();
+    	} catch (ClassCastException e) {
+    		System.err.println("Could not convert the response to a Earthquake; a field had the wrong structure.");
+    		e.printStackTrace();
+        }
     
 	}	
 }

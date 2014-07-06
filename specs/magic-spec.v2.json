@@ -1,0 +1,171 @@
+{
+    "metadata": {
+        "name": "Magic The Gathering Service",
+        "description": "Access information about Magic the Gathering Cards.",
+        "author": "Cory Bart",
+        "contact": "acbart@vt.edu",
+        "version": 2
+    },
+    "objects": {
+        "card": {
+            "format": "json",
+            "description": "A Magic the Gathering Card",
+            "fields": {
+                "id": {
+                    "type": "string",
+                    "path": "id",
+                    "description": "A unique id that identifies this card."
+                },
+                "name": {
+                    "type": "string",
+                    "path": "name",
+                    "description": "The name of this card."
+                },
+                "mana cost": {
+                    "type": "string[]",
+                    "path": "mana",
+                    "description": "The Mana cost of this card."
+                },
+                "converted mana cost": {
+                    "type": "string",
+                    "path": "cmc",
+                    "description": "The converted mana cost."
+                },
+                "types": {
+                    "type": "string[]",
+                    "path": "type",
+                    "description": "Card's types, usually at least one of \"artifact\", \"creature\", \"enchantment\", \"instant\", \"land\", \"planeswalker\", \"sorcery\", or \"tribal\". Cards can also have a supertype and/or subtype. "
+                },
+                "texts": {
+                    "type": "string[]",
+                    "path": "text",
+                    "description": "Any text blocks on the card."
+                },
+                "flavors": {
+                    "type": "string[]",
+                    "comment": "Actually returns a list of list of strings!",
+                    "path": "flavor",
+                    "description": "Any flavor texts on this card."
+                },
+                "power": {
+                    "type": "string",
+                    "path": "power",
+                    "description": "The power (http://mtg.wikia.com/wiki/Power) of this card"
+                },
+                "toughness": {
+                    "type": "string",
+                    "path": "power",
+                    "description": "The toughness (http://mtg.wikia.com/wiki/Toughness) of this card"
+                },
+                "watermark": {
+                    "type": "string",
+                    "path": "watermark",
+                    "description": "The watermark of this card"
+                },
+                "set": {
+                    "type": "string",
+                    "path": "set",
+                    "description": "The expansion set that this card belongs to."
+                },
+                "rarity": {
+                    "type": "string",
+                    "path": "rarity",
+                    "description": "How rare this card is, typically either \"uncommon\", \"common\", or \"rare\"."
+                },
+                "all sets": {
+                    "type": "Print[]",
+                    "path": "prints",
+                    "description": "All the expansion sets that this belongs to."
+                },
+                "number": {
+                    "type": "string",
+                    "path": "number",
+                    "description": "The Card Number."
+                },
+                "artist": {
+                    "type": "string",
+                    "path": "artist",
+                    "description": "The name of the artist for the card's artwork."
+                },
+                "rating": {
+                    "type": "string",
+                    "path": "rating",
+                    "description": "The card's voted upon rating."
+                },
+                "votes": {
+                    "type": "string",
+                    "path": "votes",
+                    "description": "The number of times this card has been voted on."
+                }
+            }
+        },
+        "Print": {
+            "format": "json",
+            "description": "The print expansion this belongs to.",
+            "fields": {
+                "set": {
+                    "type": "string",
+                    "path": "set",
+                    "description": "The ID code of this set."
+                },
+                "id": {
+                    "type": "integer",
+                    "path": "id",
+                    "description": "The unique id number of this set."
+                }
+            }
+        },
+        "Card Result": {
+            "format": "json",
+            "description": "The result of a card search, only having the ID and card name. You can look up the card by its ID for more complete information.",
+            "fields": {
+                "id": {
+                    "path": "id",
+                    "type": "integer",
+                    "description": "The unique id number of this card"
+                },
+                "name": {
+                    "path": "name",
+                    "type": "string",
+                    "description": "The name of this card."
+                }
+            }
+        }
+    },
+    "functions": {
+        "get card": {
+            "url": "http://api.mtgapi.com/v1/card/id/<id>",
+            "verb": "get",
+            "description": "Retrieves a card by looking up its ID.",
+            "format": "json",
+            "post": "[0]",
+            "output": "Card",
+            "comment": "If the ID doesn't exist, it returns the json response {\"code\":404,\"message\":\"This page does not exist.\"}",
+            "inputs": {
+                "id": {
+                    "type": "integer",
+                    "path": "id",
+                    "indexable": true,
+                    "description": "The unique id number of the card."
+                }
+            }
+        },
+        "search cards": {
+            "name": "Search Cards",
+            "url": "http://api.mtgapi.com/v1/card/name/<keyword>",
+            "format": "json",
+            "verb": "get",
+            "description": "Searches the database for cards with the keyword in the card's name.",
+            "comment": "If it doesn't work, then returns the JSON response {\"code\":404,\"message\":\"This page does not exist.\"}",
+            "output": "Card Result[]",
+            "inputs": {
+                "keyword": {
+                    "path": "keyword",
+                    "type": "string",
+                    "indexable": true,
+                    "description": "The keyword to match against card's names"
+                }
+            }
+        }
+    }
+}

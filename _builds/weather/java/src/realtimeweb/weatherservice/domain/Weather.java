@@ -192,19 +192,27 @@ public class Weather {
 	 * @param map The raw json data that will be parsed.
 	 * @return 
 	 */
-    
     public Weather(Map<String, Object> raw) {
-        
-        this.windSpeed = Integer.parseInt(raw.get("Winds").toString());
-        this.windchill = Integer.parseInt(raw.get("WindChill").toString());
-        this.dewpoint = Integer.parseInt(raw.get("Dewp").toString());
-        this.imageUrl = raw.get("Weatherimage").toString();
-        this.windDirection = Integer.parseInt(raw.get("Windd").toString());
-        this.visibility = Double.parseDouble(raw.get("Visibility").toString());
-        this.humidity = Integer.parseInt(raw.get("Relh").toString());
-        this.pressure = Double.parseDouble(raw.get("SLP").toString());
-        this.temp = Integer.parseInt(raw.get("Temp").toString());
-        this.description = raw.get("Weather").toString();
+        // TODO: Check that the data has the correct schema.
+        // NOTE: It's much safer to check the Map for fields than to catch a runtime exception.
+        try {
+            this.windSpeed = Integer.parseInt(raw.get("Winds").toString());
+            this.windchill = Integer.parseInt(raw.get("WindChill").toString());
+            this.dewpoint = Integer.parseInt(raw.get("Dewp").toString());
+            this.imageUrl = raw.get("Weatherimage").toString();
+            this.windDirection = Integer.parseInt(raw.get("Windd").toString());
+            this.visibility = Double.parseDouble(raw.get("Visibility").toString());
+            this.humidity = Integer.parseInt(raw.get("Relh").toString());
+            this.pressure = Double.parseDouble(raw.get("SLP").toString());
+            this.temp = Integer.parseInt(raw.get("Temp").toString());
+            this.description = raw.get("Weather").toString();
+        } catch (NullPointerException e) {
+    		System.err.println("Could not convert the response to a Weather; a field was missing.");
+    		e.printStackTrace();
+    	} catch (ClassCastException e) {
+    		System.err.println("Could not convert the response to a Weather; a field had the wrong structure.");
+    		e.printStackTrace();
+        }
     
 	}	
 }

@@ -96,13 +96,21 @@ public class Location {
 	 * @param map The raw json data that will be parsed.
 	 * @return 
 	 */
-    
     public Location(Map<String, Object> raw) {
-        
-        this.latitude = Double.parseDouble(raw.get("latitude").toString());
-        this.elavation = Integer.parseInt(raw.get("elevation").toString());
-        this.name = raw.get("areaDescription").toString();
-        this.longitude = Double.parseDouble(raw.get("longitude").toString());
+        // TODO: Check that the data has the correct schema.
+        // NOTE: It's much safer to check the Map for fields than to catch a runtime exception.
+        try {
+            this.latitude = Double.parseDouble(raw.get("latitude").toString());
+            this.elavation = Integer.parseInt(raw.get("elevation").toString());
+            this.name = raw.get("areaDescription").toString();
+            this.longitude = Double.parseDouble(raw.get("longitude").toString());
+        } catch (NullPointerException e) {
+    		System.err.println("Could not convert the response to a Location; a field was missing.");
+    		e.printStackTrace();
+    	} catch (ClassCastException e) {
+    		System.err.println("Could not convert the response to a Location; a field had the wrong structure.");
+    		e.printStackTrace();
+        }
     
 	}	
 }

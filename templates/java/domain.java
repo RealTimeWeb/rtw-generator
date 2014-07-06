@@ -59,7 +59,7 @@ public class {{ object.name | camel_case_caps }} {
 	 * @return String
 	 */
 	public String toString() {
-		return "Report[" + 
+		return "{{object.name | camel_case_caps }}[" + 
         {%- for field in object.fields -%}
         {{field.name | camel_case }}+ 
         {%- if not loop.last -%}
@@ -74,29 +74,41 @@ public class {{ object.name | camel_case_caps }} {
 	 * @param map The raw json data that will be parsed.
 	 * @return 
 	 */
-    {% if object.format == "json" %}
-    {% if object.fields[0].path.startswith("[") %}
-    public {{ object.name | camel_case_caps }}(List<Object> raw) {
-    {% else %}
+    {% if object.format == "json" -%}
+    {% if object_is_map[object.name ] -%}
     public {{ object.name | camel_case_caps }}(Map<String, Object> raw) {
-    {% endif %}
-        {% for field in object.fields -%}
-        {% if field.type | is_list %}
-        this.{{ field.name | camel_case }} = new {{ field.type | to_java_type }}();
-        Iterator<Object> {{ field.name | camel_case }}Iter = ((List<Object>){{ field.path | parse_json_path}}).iterator();
-        while ({{ field.name | camel_case }}Iter.hasNext()) {
-            this.{{ field.name | camel_case }}.add(new {{ field.type | strip_list | to_java_type }}((
-            {%- if object_is_map[field.type | strip_list] -%}
-            Map<String, Object>
-            {%- else -%}
-            List<Object>
-            {%- endif -%}
-            ){{ field.name | camel_case }}Iter.next()));
+    {%- else -%}
+    public {{ object.name | camel_case_caps }}(List<Object> raw) {
+    {%- endif %}
+        // TODO: Check that the data has the correct schema.
+        // NOTE: It's much safer to check the Map for fields than to catch a runtime exception.
+        try {
+            {%- for field in object.fields -%}
+            {%- if field.type | is_list %}
+            this.{{ field.name | camel_case }} = new {{ field.type | to_java_type }}();
+            Iterator<Object> {{ field.name | camel_case }}Iter = ((List<Object>){{ field.path | parse_json_path}}).iterator();
+            while ({{ field.name | camel_case }}Iter.hasNext()) {
+                this.{{ field.name | camel_case }}.add(new {{ field.type | strip_list | to_java_type }}((
+                {%- if object_is_map[field.type | strip_list] -%}
+                Map<String, Object>
+                {%- elif field.type | strip_list | is_builtin -%}
+                {{ field.type | strip_list| to_java_type }}
+                {%- else -%}
+                List<Object>
+                {%- endif -%}
+                ){{ field.name | camel_case }}Iter.next()));
+            }
+            {%- else %}
+            this.{{ field.name | camel_case }} = {{ field.path | parse_json_path | create_json_conversion(field.type, object_is_map[field.name])}};
+            {%- endif %}
+            {%- endfor %}
+        } catch (NullPointerException e) {
+    		System.err.println("Could not convert the response to a {{ object.name | camel_case_caps }}; a field was missing.");
+    		e.printStackTrace();
+    	} catch (ClassCastException e) {
+    		System.err.println("Could not convert the response to a {{ object.name | camel_case_caps }}; a field had the wrong structure.");
+    		e.printStackTrace();
         }
-        {%- else %}
-        this.{{ field.name | camel_case }} = {{ field.path | parse_json_path | create_json_conversion(field.type, object_is_map[field.name])}};
-        {%- endif %}
-        {%- endfor %}
     {% elif object.format == "xml" %}
     public {{ object.name | camel_case_caps }}(Node raw) {
         XPath xPath =  XPathFactory.newInstance().newXPath();

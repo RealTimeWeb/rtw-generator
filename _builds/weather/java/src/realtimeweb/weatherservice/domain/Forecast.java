@@ -161,17 +161,25 @@ public class Forecast {
 	 * @param map The raw json data that will be parsed.
 	 * @return 
 	 */
-    
     public Forecast(Map<String, Object> raw) {
-        
-        this.longDescription = ((Map<String, Object>) raw.get("data")).get("text").toString();
-        this.description = ((Map<String, Object>) raw.get("data")).get("weather").toString();
-        this.imageUrl = ((Map<String, Object>) raw.get("data")).get("iconLink").toString();
-        this.temperatureLabel = ((Map<String, Object>) raw.get("time")).get("tempLabel").toString();
-        this.periodName = ((Map<String, Object>) raw.get("time")).get("startPeriodName").toString();
-        this.probabilityOfPrecipitation = Integer.parseInt(((Map<String, Object>) raw.get("data")).get("pop").toString());
-        this.periodTime = ((Map<String, Object>) raw.get("time")).get("startValidTime").toString();
-        this.temperature = Integer.parseInt(((Map<String, Object>) raw.get("data")).get("temperature").toString());
+        // TODO: Check that the data has the correct schema.
+        // NOTE: It's much safer to check the Map for fields than to catch a runtime exception.
+        try {
+            this.longDescription = ((Map<String, Object>) raw.get("data")).get("text").toString();
+            this.description = ((Map<String, Object>) raw.get("data")).get("weather").toString();
+            this.imageUrl = ((Map<String, Object>) raw.get("data")).get("iconLink").toString();
+            this.temperatureLabel = ((Map<String, Object>) raw.get("time")).get("tempLabel").toString();
+            this.periodName = ((Map<String, Object>) raw.get("time")).get("startPeriodName").toString();
+            this.probabilityOfPrecipitation = Integer.parseInt(((Map<String, Object>) raw.get("data")).get("pop").toString());
+            this.periodTime = ((Map<String, Object>) raw.get("time")).get("startValidTime").toString();
+            this.temperature = Integer.parseInt(((Map<String, Object>) raw.get("data")).get("temperature").toString());
+        } catch (NullPointerException e) {
+    		System.err.println("Could not convert the response to a Forecast; a field was missing.");
+    		e.printStackTrace();
+    	} catch (ClassCastException e) {
+    		System.err.println("Could not convert the response to a Forecast; a field had the wrong structure.");
+    		e.printStackTrace();
+        }
     
 	}	
 }

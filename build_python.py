@@ -148,6 +148,8 @@ def build_main(model):
                 env.get_template('__init__.py', globals=model).render()}
 
 def build_python(model):
+    import os
+    print os.getcwd()
     files = {}
     files.update(build_metafiles(model))
     files.update(build_main(model))

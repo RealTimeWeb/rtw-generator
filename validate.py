@@ -176,10 +176,19 @@ def validate_spec(spec):
     def add_warning(message): warnings.append(message)
     def add_error(message): errors.append(message)
     
-    validate_metadata(spec, add_warning, add_error)
-    validate_objects(spec, add_warning, add_error)
+    if "metadata" in spec:
+        validate_metadata(spec, add_warning, add_error)
+    else:
+        add_error(keyword_not_found("metadata"))
+    if "objects" in spec:
+        validate_objects(spec, add_warning, add_error)
+    else:
+        add_error(keyword_not_found("objects"))
     validate_enums(spec, add_warning, add_error)
-    validate_functions(spec, add_warning, add_error)
+    if "functions" in spec:
+        validate_functions(spec, add_warning, add_error)
+    else:
+        add_error(keyword_not_found("functions"))
     return warnings, errors
     
 if __name__ == "__main__":

@@ -83,15 +83,23 @@ public class Report {
 	 * @param map The raw json data that will be parsed.
 	 * @return 
 	 */
-    
     public Report(Map<String, Object> raw) {
-        
-        this.weather = new Weather((Map<String, Object>)raw.get("currentobservation"));
-        this.location = new Location((Map<String, Object>)raw.get("location"));
-        this.forecasts = new ArrayList<Forecast>();
-        Iterator<Forecast> forecastsIter = ((List<Object>)raw).iterator();
-        while (forecastsIter.hasNext()) {
-            this.forecasts.add(new Forecast((Map<String, Object>)forecastsIter.next()));
+        // TODO: Check that the data has the correct schema.
+        // NOTE: It's much safer to check the Map for fields than to catch a runtime exception.
+        try {
+            this.weather = new Weather((Map<String, Object>)raw.get("currentobservation"));
+            this.location = new Location((Map<String, Object>)raw.get("location"));
+            this.forecasts = new ArrayList<Forecast>();
+            Iterator<Object> forecastsIter = ((List<Object>)raw).iterator();
+            while (forecastsIter.hasNext()) {
+                this.forecasts.add(new Forecast((List<Object>)forecastsIter.next()));
+            }
+        } catch (NullPointerException e) {
+    		System.err.println("Could not convert the response to a Report; a field was missing.");
+    		e.printStackTrace();
+    	} catch (ClassCastException e) {
+    		System.err.println("Could not convert the response to a Report; a field had the wrong structure.");
+    		e.printStackTrace();
         }
     
 	}	

@@ -10,6 +10,15 @@ def flatten_list(a_type):
     else:
         return a_type
         
+def de_identifier(name):
+    name = name.replace("_", " ").replace("-", " ")
+    result = []
+    for word in name.split(" "):
+        if word and word[0].upper() == word[0]:
+            word = word[0].lower() + word[1:]
+        result.append(word)
+    return " ".join(result)
+        
 class Metadata(object): pass
 class Enum(object): pass
 class Package(object): pass
@@ -20,7 +29,7 @@ class Input(object): pass
 
 def compile_metadata(data):
     metadata = Metadata()
-    metadata.name = data["name"]
+    metadata.name = de_identifier(data["name"])
     metadata.author = data.get("author", "Anonymous")
     metadata.contact = data.get("contact", "")
     metadata.version = data.get("version", 1.0)
@@ -30,14 +39,14 @@ def compile_metadata(data):
     
 def compile_enum(name, data):
     enum = Enum()
-    enum.name = name
-    enum.values = data
+    enum.name = de_identifier(name)
+    enum.values = de_identifier(data)
     return enum
     
 def compile_field(name, data):
     field = Field()
-    field.name = name
-    field.type = data["type"]
+    field.name = de_identifier(name)
+    field.type = de_identifier(data["type"])
     field.path = data["path"]
     if "order" in data:
         field.order = data["order"]
@@ -49,10 +58,10 @@ def compile_field(name, data):
     
 def compile_object(name, data):
     obj = Object()
-    obj.name = name
+    obj.name = de_identifier(name)
     obj.description = data.get("description", "")
     obj.comment = data.get("comment", "")
-    obj.format = data.get("format", "json")
+    obj.format = data.get("format", "json").lower()
     obj.fields = [compile_field(*data) for data in data["fields"].iteritems()]
     # We arbitrarily assume no one tries to make 1000 fields
     obj.fields.sort(key=lambda field : field.order if field.order is not None else 1000)
@@ -68,8 +77,8 @@ def compile_object(name, data):
     
 def compile_input(name, data):
     input = Input()
-    input.name = name
-    input.type = data["type"]
+    input.name = de_identifier(name)
+    input.type = de_identifier(data["type"])
     input.path = data["path"]
     input.description = data.get("description", "")
     input.comment = data.get("comment", "")
@@ -84,12 +93,12 @@ def compile_input(name, data):
     
 def compile_function(name, data):
     function = Function()
-    function.name = name
+    function.name = de_identifier(name)
     function.url = data["url"]
     url_input_names = map(str, re.findall("<(.*?)>", function.url))
-    function.verb = data["verb"]
-    function.format = data.get("format", "json")
-    function.output = data["output"]
+    function.verb = data["verb"].lower()
+    function.format = data.get("format", "json").lower()
+    function.output = de_identifier(data["output"])
     function.description = data.get("description", "")
     function.comment = data.get("comment", "")
     function.post = data.get("post", "")

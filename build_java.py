@@ -32,7 +32,7 @@ conversion_mapping = { ("string", "integer") : "Integer.parseInt",
                        ("long", "string") : "Long.toString",
                        ("float", "string") : "Double.toString",
                        ("boolean", "string") : "Boolean.toString"}
-
+                       
 json_conversion = { "integer" : "Integer.parseInt",
                      "float" : "Double.parseDouble",
                      "boolean" : "Boolean.parseBoolean",
@@ -55,7 +55,7 @@ gson_conversions = { "string" : "getAsString",
                      "boolean" : "getAsBoolean",
                      "long" : "getAsLong"}
 
-def parse_json_path(path):
+def parse_json_path(path, result="raw"):
     elements = []
     for keys in path.split("."):
         while keys:
@@ -65,7 +65,6 @@ def parse_json_path(path):
                 elements.append('"{}"'.format(left))
             if val:
                 elements.append(int(val))
-    result = "raw"
     if elements:
         for item in elements[:-1]:
             if isinstance(item, str):
@@ -73,6 +72,24 @@ def parse_json_path(path):
             else:
                 result = '((List<Object>) {}.get({}))'.format(result, item)
         result = '{}.get({})'.format(result, elements[-1])
+    return result
+    
+def parse_json_path_all(path, result="raw"):
+    elements = []
+    for keys in path.split("."):
+        while keys:
+            left, sep, keys = keys.partition("[")
+            val, sep, keys = keys.partition("]")
+            if left:
+                elements.append('"{}"'.format(left))
+            if val:
+                elements.append(int(val))
+    if elements:
+        for item in elements:
+            if isinstance(item, str):
+                result = '((Map<String, Object>) {}).get({})'.format(result, item)
+            else:
+                result = '((ArrayList<Object>) {}).get({})'.format(result, item)
     return result
 
 def convert_url_parameters(url):
@@ -125,6 +142,19 @@ def convert_to_java_type(source_type):
         return "ArrayList<{}>".format(target_type)
     else: # otherwise just return it normally
         return target_type
+    
+def make_array(object_map, type):
+    if type in object_map and not object_map[type]:
+        return "Array"
+    else:
+        return ""
+        
+def enforce_json_array(root, post):
+    if post == "" or post.startswith("["):
+        return root + "Array()"
+    else:
+        return root + "()"
+    
 
 env.filters['to_java_type'] = convert_to_java_type
 env.filters['convert_url_parameters'] = convert_url_parameters
@@ -133,9 +163,12 @@ env.filters['is_builtin'] = is_builtin
 env.filters['is_list'] = is_list
 env.filters['strip_list'] = strip_list
 env.filters['parse_json_path'] = parse_json_path
+env.filters['parse_json_path_all'] = parse_json_path_all
 env.filters['create_json_conversion'] = create_json_conversion
 env.filters['create_xml_conversion'] = create_xml_conversion
 env.filters['convert_builtin'] = convert_builtin
+env.filters['make_array'] = make_array
+env.filters['enforce_json_array'] = enforce_json_array
 
 def build_metafiles(model):
     return {'java/.classpath': env.get_template('.classpath',globals=model).render(),
@@ -163,7 +196,7 @@ def copy_file(filename):
         return input.read()
 
 def build_java(model):
-    files = {'java/libs/StickyWeb.jar' : copy_file(templates+'libs/StickyWeb.jar')}
+    files = {'java/libs/StickyWeb-doc-0.1.jar' : copy_file(templates+'libs/StickyWeb-doc-0.1.jar')}
     files.update(build_metafiles(model))
     files.update(build_main(model))
     files.update(build_classes(model))

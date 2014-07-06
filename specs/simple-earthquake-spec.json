@@ -1,0 +1,92 @@
+{
+    "metadata": {
+        "name": "Simple Earthquake",
+        "description": "Get the latest information about earthquakes around the world.",
+        "author": "Cory Bart",
+        "version": 1,
+        "contact": "acbart@vt.edu"
+    },
+    "objects": {
+        "earthquake": {
+            "name": "earthquake",
+            "format": "json",
+            "description": "Information about a specific earthquake.",
+            "fields": {
+                "location": {
+                    "type": "coordinate",
+                    "path": "geometry.coordinates",
+                    "description": "The location of the earthquake."
+                },
+                "magnitude": {
+                    "type": "float",
+                    "path": "properties.mag",
+                    "description": "The magnitude of the earthquake on the Richter Scale."
+                },
+                "location description": {
+                    "type": "string",
+                    "path": "properties.place",
+                    "description": "A human-readable description of the location."
+                },
+                "time": {
+                    "type": "long",
+                    "path": "properties.time",
+                    "description": "The epoch time (http://en.wikipedia.org/wiki/Unix_time) when this earthquake occurred."
+                },
+                "id": {
+                    "type": "string",
+                    "path": "id",
+                    "description": "A uniquely identifying id for this earthquake."
+                }
+            }
+        },
+        "coordinate": {
+            "format": "json",
+            "description": "The longitudinal, latitudinal, and depth where the earthquake occurred.",
+            "comment": "For some unclear reason, these are stored as a list instead of a dictionary.",
+            "fields": {
+                "longitude": {
+                    "type": "float",
+                    "path": "[0]",
+                    "description": "The longitude (West-North) component.",
+                    "order": 0
+                },
+                "latitude": {
+                    "type": "float",
+                    "path": "[1]",
+                    "description": "The latitude (South-North) component.",
+                    "order": 1
+                },
+                "depth": {
+                    "type": "float",
+                    "path": "[2]",
+                    "description": "The depth (closer or farther from the surface) component.",
+                    "order": 2
+                }
+            }
+        }
+    },
+    "functions": {
+        "get earthquakes": {
+            "url": "http://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/<threshold>_<time>.geojson",
+            "format": "json",
+            "verb": "get",
+            "description": "Retrieves information about earthquakes around the world.",
+            "output": "earthquake[]",
+            "post": "features",
+            "inputs": {
+                "threshold": {
+                    "path": "threshold",
+                    "type": "string",
+                    "description": "A string indicating what kind of earthquakes to report. Must be either \"significant\" (only significant earthquakes), \"all\" (all earthquakes, regardless of significance), \"4.5\", \"2.5\", or \"1.0\". Note that for the last three, all earthquakes at and above that level will be reported.",
+                    "indexable": true
+                },
+                "time": {
+                    "path": "time",
+                    "type": "string",
+                    "description": "A string indicating the time range of earthquakes to report. Must be either \"hour\" (only earthquakes in the past hour), \"day\" (only earthquakes that happened today), \"week\" (only earthquakes that happened in the past 7 days), or \"month\" (only earthquakes that happened in the past 30 days).",
+                    "indexable": true
+                }
+            }
+        }
+    }
+}

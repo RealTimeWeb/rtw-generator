@@ -1,0 +1,73 @@
+{
+    "metadata": {
+        "name": "Simple Business",
+        "description": "Get information about businesses in America.",
+        "author": "Cory Bart",
+        "version": 1,
+        "contact": "acbart@vt.edu"
+    },
+    "objects": {
+        "Business": {
+            "name": "earthquake",
+            "format": "json",
+            "description": "Information about a specific earthquake.",
+            "fields": {
+                "description": {
+                    "type": "string",
+                    "path": "snippet_text",
+                    "description": "Snippet text associated with this business"
+                },
+                "phone": {
+                    "type": "string",
+                    "path": "display_phone",
+                    "description": "Phone number for this business formatted for display"
+                },
+                "rating": {
+                    "type": "float",
+                    "path": "rating",
+                    "description": "Rating for this business (value ranges from 1, 1.5, ... 4.5, 5)"
+                },
+                "location": {
+                    "type": "string",
+                    "path": "location.display_address",
+                    "description": "Address for this business formatted for display. Includes all address fields, cross streets and city, state_code, etc."
+                },
+                "name": {
+                    "type": "string",
+                    "path": "name",
+                    "description": "Name of this business."
+                },
+                "id": {
+                    "type": "string",
+                    "path": "id",
+                    "description": "A uniquely identifying id for this business."
+                }
+            }
+        }
+    },
+    "functions": {
+        "search": {
+            "url": "http://api.yelp.com/v2/search",
+            "format": "json",
+            "verb": "get",
+            "description": "Retrieves information about the businesses that include the given term for the given area",
+            "output": "business[]",
+            "post": "businesses",
+            "inputs": {
+                "term": {
+                    "path": "term",
+                    "type": "string",
+                    "comment": "Remember to convert spaces to \"+\"!",
+                    "description": "Search term (e.g. \"food\", \"restaurants\").",
+                    "indexable": true
+                },
+                "location": {
+                    "path": "location",
+                    "type": "string",
+                    "description": "Specifies the combination of \"address, neighborhood, city, state or zip, optional country\" to be used when searching for businesses.",
+                    "indexable": true
+                }
+            }
+        }
+    }
+}
