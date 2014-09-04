@@ -103,6 +103,18 @@ public class {{ metadata.name | camel_case_caps }} {
 	}
     
     {% for function in functions %}
+    /**
+     * {{ function.description }}
+     *
+     * This version of the function meant for instructors to capture a
+     * StickyWebRequest object which can be put into an EditableCache and then
+     * stored to a "cache.json" file.
+     * 
+     {% for input in function.visible_inputs -%}
+     * @param {{input.name | camel_case }} {{input.description }}
+     * @return a StickyWebRequest
+     {% endfor -%}
+    */
     private StickyWebRequest {{ function.name | camel_case }}Request(
     {%- for input in function.visible_inputs -%}
         {{ input.type | to_java_type }} {{input.name | camel_case }}
@@ -110,6 +122,12 @@ public class {{ metadata.name | camel_case_caps }} {
     {%- endfor -%}
     ) {
         try {
+            /*
+            * Perform any user parameter validation here. E.g.,
+            * if the first argument can't be zero, or they give an empty string.
+            */
+            
+            // Build up query string
             final String url = String.format("{{ function.url | convert_url_parameters }}"
             {%- for parameter in function.url_inputs -%}
             {%- if parameter.hidden -%}
@@ -119,22 +137,29 @@ public class {{ metadata.name | camel_case_caps }} {
             {%- endif -%}
             {%- endfor -%}
             );
+            
+            // Build up the query arguments that will be sent to the server
             HashMap<String, String> parameters = new HashMap<String, String>();
-            // TODO: Validate the inputs here
             {%- for parameter in function.payload_inputs -%}
-            {%- if parameter.hidden -%}
+            {%- if parameter.hidden %}
             parameters.put("{{ parameter.path }}", "{{ parameter.default }}");
             {%- else %}
             parameters.put("{{ parameter.path }}", String.valueOf({{ parameter.name }}));
             {%- endif -%}
             {% endfor %}
+            
+            // Build up the list of actual arguments that should be used to
+            // create the local cache hash key
             ArrayList<String> indexList = new ArrayList<String>();
             {% for parameter in function.payload_inputs if parameter.indexed -%}
             indexList.add("{{ parameter.path }}");
             {% endfor %}
+            
+            // Build and return the connection object.
             return connection.{{ function.verb }}(url, parameters)
                             .setOnline(online)
                             .setIndexes(indexList);
+        
         } catch (StickyWebDataSourceNotFoundException e) {
 			System.err.println("Could not find the data source.");
 		}
@@ -144,7 +169,7 @@ public class {{ metadata.name | camel_case_caps }} {
     /**
      * {{ function.description }}
     {% for input in function.visible_inputs %}
-     * @param cache {{ input.description }}
+     * @param {{input.name| camel_case}} {{ input.description }}
     {%- endfor %}
      * @return a {{ function.output }}
      */

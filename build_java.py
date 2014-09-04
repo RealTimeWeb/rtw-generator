@@ -196,7 +196,7 @@ def copy_file(filename):
         return input.read()
 
 def build_java(model):
-    files = {'java/libs/StickyWeb-doc-0.1.jar' : copy_file(templates+'libs/StickyWeb-doc-0.1.jar')}
+    files = {'java/libs/StickyWeb-doc-2.5.jar' : copy_file(templates+'libs/StickyWeb-doc-2.5.jar')}
     files.update(build_metafiles(model))
     files.update(build_main(model))
     files.update(build_classes(model))
